@@ -35,9 +35,10 @@ import os
 # 3rd-party
 import line_profiler
 
+from PyPoE.poe.file.ot import OTFile
+
 # self
 from PyPoE.poe.file.shared.keyvalues import *
-from PyPoE.poe.file.ot import OTFile
 
 # =============================================================================
 # Globals
@@ -57,17 +58,17 @@ __all__ = []
 # Init
 # =============================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     profiler = line_profiler.LineProfiler()
     profiler.add_function(AbstractKeyValueFile._read)
     profiler.add_function(AbstractKeyValueFile.__missing__)
 
     def run():
-        f = 'C:/Temp/'
+        f = "C:/Temp/"
         sections = set()
         for path, dirnames, filenames in os.walk(f):
             for filename in filenames:
-                if not filename.endswith('.ot'):
+                if not filename.endswith(".ot"):
                     continue
 
                 ot = OTFile(parent_or_base_dir_or_ggpk=f)
@@ -79,11 +80,10 @@ if __name__ == '__main__':
         sections.sort()
         print(sections)
 
+    profiler.run("run()")
 
-    profiler.run('run()')
-
-    #ot = OTFile(parent_or_base_dir_or_ggpk=f)
-    #ot.read('C:\Temp\Metadata\Items\Armours\BodyArmours\AbstractBodyArmour.ot')
-    #print(ot.keys())
+    # ot = OTFile(parent_or_base_dir_or_ggpk=f)
+    # ot.read('C:\Temp\Metadata\Items\Armours\BodyArmours\AbstractBodyArmour.ot')
+    # print(ot.keys())
 
     profiler.print_stats()

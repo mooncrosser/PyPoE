@@ -74,7 +74,7 @@ import os
 import re
 from enum import IntEnum
 from io import BytesIO
-from typing import Union, List, Dict, Callable, Any
+from typing import Any, Callable, Dict, List, Union
 
 # self
 from PyPoE.shared.mixins import ReprMixin
@@ -84,12 +84,11 @@ from PyPoE.shared.mixins import ReprMixin
 # =============================================================================
 
 __all__ = [
-    'ParserError',
-    'ParserWarning'
-    'AbstractFileReadOnly',
-    'AbstractFile',
-    'FILE_SYSTEM_TYPES',
-    'AbstractFileSystemNode',
+    "ParserError",
+    "ParserWarning" "AbstractFileReadOnly",
+    "AbstractFile",
+    "FILE_SYSTEM_TYPES",
+    "AbstractFileSystemNode",
 ]
 
 # =============================================================================
@@ -102,6 +101,7 @@ class ParserError(Exception):
     This exception or subclasses of this exception are raised when general
     errors related to the parsing of files occur, such as malformed files.
     """
+
     pass
 
 
@@ -111,6 +111,7 @@ class ParserWarning(UserWarning):
     parsing process there are cases where issues are not severe enough to
     entirely fail the passing, but could pose serious problems.
     """
+
     pass
 
 
@@ -126,6 +127,7 @@ class AbstractFileReadOnly(ReprMixin):
     It provides common methods as well as methods that implementing classes
     should override.
     """
+
     def _read(self, buffer, *args, **kwargs):
         """
         Parameters
@@ -135,10 +137,13 @@ class AbstractFileReadOnly(ReprMixin):
         """
         raise NotImplementedError()
 
-    def get_read_buffer(self,
-                        file_path_or_raw: Union[BytesIO, bytes, str],
-                        function: Callable,
-                        *args, **kwargs) -> Any:
+    def get_read_buffer(
+        self,
+        file_path_or_raw: Union[BytesIO, bytes, str],
+        function: Callable,
+        *args,
+        **kwargs,
+    ) -> Any:
         """
         Will attempt to open the given file_path_or_raw in read mode and pass
         the buffer to the specified function.
@@ -171,15 +176,14 @@ class AbstractFileReadOnly(ReprMixin):
         elif isinstance(file_path_or_raw, bytes):
             return function(*args, buffer=BytesIO(file_path_or_raw), **kwargs)
         elif isinstance(file_path_or_raw, str):
-            with open(file_path_or_raw, 'rb') as f:
+            with open(file_path_or_raw, "rb") as f:
                 return function(*args, buffer=f, **kwargs)
         else:
-            raise TypeError('file_path_or_raw must be a file path or bytes object')
+            raise TypeError("file_path_or_raw must be a file path or bytes object")
 
-    def read(self,
-             file_path_or_raw: Union[BytesIO, bytes, str],
-             *args,
-             **kwargs) -> Any:
+    def read(
+        self, file_path_or_raw: Union[BytesIO, bytes, str], *args, **kwargs
+    ) -> Any:
         """
         Reads the file contents into the specified path or buffer. This will
         also reset any existing contents of the file.
@@ -231,10 +235,13 @@ class AbstractFile(AbstractFileReadOnly):
         """
         raise NotImplementedError()
 
-    def get_write_buffer(self,
-                         file_path_or_raw: Union[BytesIO, bytes, str],
-                         function: Callable,
-                         *args, **kwargs) -> Any:
+    def get_write_buffer(
+        self,
+        file_path_or_raw: Union[BytesIO, bytes, str],
+        function: Callable,
+        *args,
+        **kwargs,
+    ) -> Any:
         """
         Will attempt to open the given file_path_or_raw in write mode and pass
         the buffer to the specified function.
@@ -266,15 +273,14 @@ class AbstractFile(AbstractFileReadOnly):
         elif isinstance(file_path_or_raw, bytes):
             return function(*args, buffer=BytesIO(file_path_or_raw), **kwargs)
         elif isinstance(file_path_or_raw, str):
-            with open(file_path_or_raw, 'wb') as f:
+            with open(file_path_or_raw, "wb") as f:
                 return function(*args, buffer=f, **kwargs)
         else:
-            raise TypeError('file_path_or_raw must be a file path or bytes object')
+            raise TypeError("file_path_or_raw must be a file path or bytes object")
 
-    def write(self,
-              file_path_or_raw: Union[BytesIO, bytes, str],
-              *args,
-              **kwargs) -> Any:
+    def write(
+        self, file_path_or_raw: Union[BytesIO, bytes, str], *args, **kwargs
+    ) -> Any:
         """
         Write the contents of file to the specified path or buffer.
 
@@ -316,18 +322,20 @@ class FILE_SYSTEM_TYPES(IntEnum):
 
 
 class AbstractFileSystemNode(ReprMixin):
-    __slots__ = ['parent', 'file_system_type', 'is_file', 'children']
+    __slots__ = ["parent", "file_system_type", "is_file", "children"]
 
-    def __init__(self,
-                parent: 'FileSystemNode',
-                file_system_type: FILE_SYSTEM_TYPES,
-                is_file: bool):
-        self.parent: 'FileSystemNode' = parent
+    def __init__(
+        self,
+        parent: "FileSystemNode",
+        file_system_type: FILE_SYSTEM_TYPES,
+        is_file: bool,
+    ):
+        self.parent: "FileSystemNode" = parent
         self.file_system_type: FILE_SYSTEM_TYPES = file_system_type
         self.is_file: bool = is_file
-        self.children: Dict[str, 'FileSystemNode'] = {}
+        self.children: Dict[str, "FileSystemNode"] = {}
 
-    def __getitem__(self, item: str) -> 'AbstractFileSystemNode':
+    def __getitem__(self, item: str) -> "AbstractFileSystemNode":
         """
         Return the the specified file or directory path.
 
@@ -359,7 +367,7 @@ class AbstractFileSystemNode(ReprMixin):
         FileNotFoundError
             if the specified item is not found
         """
-        item = item.strip('/\\')
+        item = item.strip("/\\")
         if not item:
             return self
 
@@ -381,9 +389,7 @@ class AbstractFileSystemNode(ReprMixin):
                     obj = child
                     break
             else:
-                raise FileNotFoundError('%s/%s not found' % (
-                    self.get_path(), item
-                ))
+                raise FileNotFoundError("%s/%s not found" % (self.get_path(), item))
 
     @property
     def data(self) -> bytes:
@@ -404,7 +410,7 @@ class AbstractFileSystemNode(ReprMixin):
         raise NotImplementedError
 
     @property
-    def files(self) -> List['FileSystemNode']:
+    def files(self) -> List["FileSystemNode"]:
         """
         Returns a list of nodes which belong to files
 
@@ -416,7 +422,7 @@ class AbstractFileSystemNode(ReprMixin):
         return [child for child in self.children.values() if child.is_file]
 
     @property
-    def directories(self) -> List['FileSystemNode']:
+    def directories(self) -> List["FileSystemNode"]:
         """
         Returns a list of nodes which belong to directories
 
@@ -434,11 +440,12 @@ class AbstractFileSystemNode(ReprMixin):
         """
         return not self.is_file
 
-    def search(self,
-               regex: re.Pattern,
-               search_files: bool = True,
-               search_directories: bool = True) -> \
-            List['AbstractFileSystemNode']:
+    def search(
+        self,
+        regex: re.Pattern,
+        search_files: bool = True,
+        search_directories: bool = True,
+    ) -> List["AbstractFileSystemNode"]:
         """
 
         Parameters
@@ -468,9 +475,12 @@ class AbstractFileSystemNode(ReprMixin):
 
         while len(q) > 0:
             node = q.pop()
-            if ((search_files and node.is_file or
-                 search_directories and node.is_directory)
-                    and re.search(regex, node.name)):
+            if (
+                search_files
+                and node.is_file
+                or search_directories
+                and node.is_directory
+            ) and re.search(regex, node.name):
                 nodes.append(node)
 
             for child in node.children:
@@ -486,12 +496,14 @@ class AbstractFileSystemNode(ReprMixin):
         -------
             Full path
         """
-        return '/'.join([n.name for n in self.get_parent(make_list=True)])
+        return "/".join([n.name for n in self.get_parent(make_list=True)])
 
-    def get_parent(self,
-                   n: int = -1,
-                   stop_at: Union['AbstractFileSystemNode', None] = None,
-                   make_list: bool = False) -> 'AbstractFileSystemNode':
+    def get_parent(
+        self,
+        n: int = -1,
+        stop_at: Union["AbstractFileSystemNode", None] = None,
+        make_list: bool = False,
+    ) -> "AbstractFileSystemNode":
         """
         Gets the n-th parent or returns root parent if at top level.
         Negative values for n will iterate until the root is found.
@@ -549,13 +561,13 @@ class AbstractFileSystemNode(ReprMixin):
             function to call when walking
         """
         q = []
-        q.append({'node': self, 'depth': 0})
+        q.append({"node": self, "depth": 0})
 
         while len(q) > 0:
             data = q.pop()
             function(**data)
-            for child in data['node'].children.values():
-                q.append({'node': child, 'depth': data['depth'] + 1})
+            for child in data["node"].children.values():
+                q.append({"node": child, "depth": data["depth"] + 1})
 
         """for child in self.children:
             function(child)
@@ -579,5 +591,5 @@ class AbstractFileSystemNode(ReprMixin):
             for node in self.children.values():
                 node.extract_to(dir_path)
         else:
-            with open(dir_path, 'wb') as f:
+            with open(dir_path, "wb") as f:
                 f.write(bytes(self))

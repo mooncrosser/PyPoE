@@ -34,10 +34,13 @@ from PyPoE.poe.file.specification.fields import *
 # Globals
 # =============================================================================
 
-__all__ = ['specification', ]
+__all__ = [
+    "specification",
+]
 
-specification = Specification({
-    'SkillTotems.dat': File(
-    ),
-    # <specification>
-})
+specification = Specification(
+    {
+        "SkillTotems.dat": File(),
+        # <specification>
+    }
+)

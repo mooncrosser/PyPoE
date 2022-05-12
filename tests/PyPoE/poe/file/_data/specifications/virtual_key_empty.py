@@ -37,31 +37,33 @@ from PyPoE.poe.file.specification.fields import *
 # Globals
 # =============================================================================
 
-specification = Specification({
-    'Main.dat': File(
-        fields=(
-            Field(
-                name='One',
-                type='int',
+specification = Specification(
+    {
+        "Main.dat": File(
+            fields=(
+                Field(
+                    name="One",
+                    type="int",
+                ),
+                Field(
+                    name="Two",
+                    type="int",
+                ),
+                Field(
+                    name="Three",
+                    type="int",
+                ),
+                Field(
+                    name="Four",
+                    type="int",
+                ),
             ),
-            Field(
-                name='Two',
-                type='int',
-            ),
-            Field(
-                name='Three',
-                type='int',
-            ),
-            Field(
-                name='Four',
-                type='int',
+            virtual_fields=(
+                VirtualField(
+                    name="Empty",
+                    fields=(""),
+                ),
             ),
         ),
-        virtual_fields=(
-            VirtualField(
-                name='Empty',
-                fields=(''),
-            ),
-        ),
-    ),
-})
+    }
+)

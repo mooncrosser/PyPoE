@@ -29,12 +29,11 @@ See PyPoE/LICENSE
 # Imports
 # =============================================================================
 
-# Python
-import sys
-
 # 3rd-party
 import cProfile
-#from line_profiler import LineProfiler
+
+# Python
+import sys
 
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
@@ -43,6 +42,9 @@ from PySide2.QtWidgets import *
 from PyPoE.poe.file.file_system import FileSystem
 from PyPoE.ui.shared.file.handler import DatStyle
 from PyPoE.ui.shared.file.manager import FileDataManager
+
+# from line_profiler import LineProfiler
+
 
 # =============================================================================
 # Globals
@@ -57,30 +59,30 @@ __all__ = []
 # =============================================================================
 # Functions
 # =============================================================================
-if __name__ == '__main__':
-    '''profiler = LineProfiler(
+if __name__ == "__main__":
+    """profiler = LineProfiler(
         DatStyle.sizeHint,
         DatStyle._get_text,
         DatStyle._show_value,
-    )'''
+    )"""
     translator = QTranslator()
-    translator.load('i18n/en_US')
+    translator.load("i18n/en_US")
     app = QApplication(sys.argv)
     app.installTranslator(translator)
     frame = QMainWindow()
     frame.setMinimumSize(2000, 1000)
 
-    fs = FileSystem(r'M:\Steam\steamapps\common\Path of Exile')
+    fs = FileSystem(r"M:\Steam\steamapps\common\Path of Exile")
 
-    f = 'HeistEquipment.dat'
+    f = "HeistEquipment.dat"
 
-    data = fs.get_file('Data/' + f)
-    #for item in dir(o):
-     #   print(item, getattr(o, item))
+    data = fs.get_file("Data/" + f)
+    # for item in dir(o):
+    #   print(item, getattr(o, item))
     fm = FileDataManager(None)
     h = fm.get_handler(f)
-    #profiler.run('w = h.get_widget(data, f, parent=frame)')
-    #profiler.print_stats()
+    # profiler.run('w = h.get_widget(data, f, parent=frame)')
+    # profiler.print_stats()
     w = h.get_widget(data, f, parent=frame)
     frame.setCentralWidget(w)
 

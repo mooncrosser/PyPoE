@@ -44,16 +44,14 @@ from PyPoE.cli.exporter.wiki.parser import BaseParser
 # Classes
 # =============================================================================
 
+
 class WarbandsHandler(ExporterHandler):
     def __init__(self, sub_parser):
-        self.parser = sub_parser.add_parser('warbands', help='Warbands Exporter')
+        self.parser = sub_parser.add_parser("warbands", help="Warbands Exporter")
         self.parser.set_defaults(func=lambda args: self.parser.print_help())
         lua_sub = self.parser.add_subparsers()
 
-        parser = lua_sub.add_parser(
-            'warbands',
-            help='Extract warbands info.'
-        )
+        parser = lua_sub.add_parser("warbands", help="Extract warbands info.")
         self.add_default_parsers(
             parser=parser,
             cls=WarbandsParser,
@@ -62,8 +60,8 @@ class WarbandsHandler(ExporterHandler):
         )
 
         parser = lua_sub.add_parser(
-            'graph',
-            help='Extract the warbands movement graph.',
+            "graph",
+            help="Extract the warbands movement graph.",
         )
         self.add_default_parsers(
             parser=parser,
@@ -72,79 +70,79 @@ class WarbandsHandler(ExporterHandler):
             wiki=False,
         )
         parser.add_argument(
-            'type',
-            choices=('map', 'normal'),
-            help='The type of the graph file to extract.',
+            "type",
+            choices=("map", "normal"),
+            help="The type of the graph file to extract.",
         )
         parser.add_argument(
-            '-f', '--format',
-            choices=('svg', 'pdf', 'png'),
-            default='svg',
-            help='File format to use when extracting.',
+            "-f",
+            "--format",
+            choices=("svg", "pdf", "png"),
+            default="svg",
+            help="File format to use when extracting.",
         )
+
 
 class WarbandsParser(BaseParser):
 
     # Load files in advance
     _files = [
-        'MonsterPacks.dat',
-        'MonsterVarieties.dat',
-        'WarbandsGraph.dat',
-        'WarbandsMapGraph.dat',
-        'WarbandsPackNumbers.dat',
-        'WarbandsPackMonsters.dat',
-        'WorldAreas.dat',
+        "MonsterPacks.dat",
+        "MonsterVarieties.dat",
+        "WarbandsGraph.dat",
+        "WarbandsMapGraph.dat",
+        "WarbandsPackNumbers.dat",
+        "WarbandsPackMonsters.dat",
+        "WorldAreas.dat",
     ]
 
     # Load translations in advance
-    _translations = [
-    ]
+    _translations = []
 
     def warbands(self, parsed_args):
         out = []
-        for warband in self.rr['WarbandsPackMonsters.dat']:
-            out.append(warband['Id'])
-            out.append('\n\n')
+        for warband in self.rr["WarbandsPackMonsters.dat"]:
+            out.append(warband["Id"])
+            out.append("\n\n")
 
-            '''for key in warband['Data0']:
+            """for key in warband['Data0']:
                 mob = self.monster_varieties.table_data[key]
-                out.append(mob['Name'])'''
-
+                out.append(mob['Name'])"""
 
             for i in range(1, 5):
-                out.append('Tier %s: %s\n' % (i, warband['Tier%sName' % i]))
-                for mv in warband['Tier%s_MonsterVarietiesKeys' % i]:
-                    out.append("%s %s\n" % (mv['Name'], mv.rowid))
-                    #out.append(mob)
-                    #break
-                out.append('\n')
+                out.append("Tier %s: %s\n" % (i, warband["Tier%sName" % i]))
+                for mv in warband["Tier%s_MonsterVarietiesKeys" % i]:
+                    out.append("%s %s\n" % (mv["Name"], mv.rowid))
+                    # out.append(mob)
+                    # break
+                out.append("\n")
 
-            out.append('-' * 80 + '\n')
+            out.append("-" * 80 + "\n")
 
         r = ExporterResult()
-        r.add_result(text=''.join(out), out_file='warbands.txt')
+        r.add_result(text="".join(out), out_file="warbands.txt")
 
         return r
 
     def graph(self, parsed_args, **kwargs):
-        if parsed_args.type == 'map':
-            dat_file = self.rr['WarbandsMapGraph.dat']
-            out_file = 'warbands_map_graph.cv'
-        elif parsed_args.type == 'normal':
-            dat_file = self.rr['WarbandsGraph.dat']
-            out_file = 'warbands_graph.cv'
+        if parsed_args.type == "map":
+            dat_file = self.rr["WarbandsMapGraph.dat"]
+            out_file = "warbands_map_graph.cv"
+        elif parsed_args.type == "normal":
+            dat_file = self.rr["WarbandsGraph.dat"]
+            out_file = "warbands_graph.cv"
 
-        console('Creating Graph...')
-        dot = Digraph(comment='Warbands Graph', engine='dot', format=parsed_args.format)
+        console("Creating Graph...")
+        dot = Digraph(comment="Warbands Graph", engine="dot", format=parsed_args.format)
         for row in dat_file:
-            world_area = row['WorldAreasKey']
-            dot.node(str(row.rowid), world_area['Name'])
-            for node in row['Connections']:
+            world_area = row["WorldAreasKey"]
+            dot.node(str(row.rowid), world_area["Name"])
+            for node in row["Connections"]:
                 dot.edge(str(row.rowid), str(node))
 
-        out_path = os.path.join(kwargs['out_dir'], out_file)
+        out_path = os.path.join(kwargs["out_dir"], out_file)
         console('Writing graph to "%s"...' % out_path)
         dot.render(out_path, view=parsed_args.print)
 
-        console('Done.')
+        console("Done.")
         return 0

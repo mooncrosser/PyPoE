@@ -11,13 +11,18 @@ from types import SimpleNamespace
 
 from PyPoE import DIR
 from PyPoE.poe.file.specification.fields import VirtualField
-from PyPoE.poe.file.specification.generation.column_naming import UnknownColumnNameGenerator
-from PyPoE.poe.file.specification.generation.custom_attributes import custom_attributes, CustomizedField
+from PyPoE.poe.file.specification.generation.column_naming import (
+    UnknownColumnNameGenerator,
+)
+from PyPoE.poe.file.specification.generation.custom_attributes import (
+    CustomizedField,
+    custom_attributes,
+)
 from PyPoE.poe.file.specification.generation.virtual_fields import virtual_fields
 
 
 def main():
-    if len(sys.argv) > 1 and sys.argv[1] == 'local':
+    if len(sys.argv) > 1 and sys.argv[1] == "local":
         schema_json = _read_dat_schema_local()
     else:
         schema_json = _read_latest_dat_schema_release()
@@ -27,14 +32,14 @@ def main():
 
 
 def _read_latest_dat_schema_release() -> str:
-    url = 'https://github.com/poe-tool-dev/dat-schema/releases/download/latest/schema.min.json'
+    url = "https://github.com/poe-tool-dev/dat-schema/releases/download/latest/schema.min.json"
     response = urllib.request.urlopen(url)
     return response.read().decode()
 
 
 def _read_dat_schema_local() -> str:
-    path = os.path.join(DIR, '..', '..', 'dat-schema', 'schema.min.json')
-    with open(path, 'r', encoding='utf-8') as f:
+    path = os.path.join(DIR, "..", "..", "dat-schema", "schema.min.json")
+    with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -44,20 +49,20 @@ def _load_dat_schema_tables(schema_json: str):
 
 
 def _convert_tables(tables: list) -> str:
-    spec = ''
+    spec = ""
     converted_tables = [_convert_table(table) for table in tables]
-    with open('template.py', 'r') as f:
+    with open("template.py", "r") as f:
         f.readline()
         for line in f:
-            if line == '    # <specification>\n':
-                spec += ''.join(converted_tables)
+            if line == "    # <specification>\n":
+                spec += "".join(converted_tables)
             else:
                 spec += line
     return spec
 
 
 def _convert_table(table) -> str:
-    table_name = f'{table.name}.dat'
+    table_name = f"{table.name}.dat"
     spec = f"    '{table_name}': File(\n"
 
     spec += _convert_columns(table_name, table.columns)
@@ -78,7 +83,9 @@ def _convert_columns(table_name: str, columns: list) -> str:
     return spec
 
 
-def _convert_column(table_name: str, column, name_generator: UnknownColumnNameGenerator) -> str:
+def _convert_column(
+    table_name: str, column, name_generator: UnknownColumnNameGenerator
+) -> str:
     column_name = column.name if column.name else name_generator.next_name(column)
     column_type = _convert_column_type(column)
     if table_name in custom_attributes and column_name in custom_attributes[table_name]:
@@ -91,7 +98,7 @@ def _convert_column(table_name: str, column, name_generator: UnknownColumnNameGe
     spec += f"                type='{column_type}',\n"
     if column.references:
         spec += f"                key='{column.references.table}.dat',\n"
-        if hasattr(column.references, 'column'):
+        if hasattr(column.references, "column"):
             spec += f"                key_id='{column.references.column}',\n"
     if column.unique:
         spec += f"                unique=True,\n"
@@ -111,41 +118,41 @@ def _convert_column(table_name: str, column, name_generator: UnknownColumnNameGe
 
 
 def _convert_column_type(column) -> str:
-    if column.type == 'array':
-        return 'ref|list|byte'
+    if column.type == "array":
+        return "ref|list|byte"
     elif column.array:
-        return 'ref|list|' + _TYPE_MAP[column.type]
+        return "ref|list|" + _TYPE_MAP[column.type]
     else:
         return _TYPE_MAP[column.type]
 
 
 _TYPE_MAP = {
-    'bool': 'bool',
-    'string': 'ref|string',
-    'i32': 'int',
-    'f32': 'float',
-    'foreignrow': 'ulong',
-    'row': 'ref|generic',
+    "bool": "bool",
+    "string": "ref|string",
+    "i32": "int",
+    "f32": "float",
+    "foreignrow": "ulong",
+    "row": "ref|generic",
 }
 
 
 def _convert_virtual_fields(fields: list[VirtualField]) -> str:
-    spec = '        virtual_fields=(\n'
+    spec = "        virtual_fields=(\n"
     for field in fields:
-        spec += '            VirtualField(\n'
+        spec += "            VirtualField(\n"
         spec += f"                name='{field.name}',\n"
         field_names = "'" + "', '".join(field.fields) + "'"
         spec += f"                fields=({field_names}),\n"
         if field.zip:
             spec += "                zip=True,\n"
-        spec += '            ),\n'
-    spec += '        ),\n'
+        spec += "            ),\n"
+    spec += "        ),\n"
     return spec
 
 
 def _write_spec(spec: str):
-    path = os.path.join(os.path.dirname(__file__), '..', 'data', 'stable.py')
-    with open(path, 'w', encoding='utf-8') as f:
+    path = os.path.join(os.path.dirname(__file__), "..", "data", "stable.py")
+    with open(path, "w", encoding="utf-8") as f:
         f.write(spec)
 
 

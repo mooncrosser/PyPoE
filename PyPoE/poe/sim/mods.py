@@ -51,34 +51,35 @@ Documentation
 
 # 3rd-party
 
+from PyPoE.poe.constants import MOD_DOMAIN, MOD_GENERATION_TYPE, MOD_STATS_RANGE
+
 # self
 from PyPoE.poe.file.dat import DatRecord
 from PyPoE.poe.file.translations import TranslationFileCache
-from PyPoE.poe.constants import MOD_DOMAIN, MOD_GENERATION_TYPE, MOD_STATS_RANGE
 
 # =============================================================================
 # Globals
 # =============================================================================
 
 __all__ = [
-    'SpawnChanceCalculator',
-    'generate_spawnable_mod_list',
-    'get_mod_from_id',
-    'get_spawn_weight',
-    'get_translation',
-    'get_translation_file_from_domain',
+    "SpawnChanceCalculator",
+    "generate_spawnable_mod_list",
+    "get_mod_from_id",
+    "get_spawn_weight",
+    "get_translation",
+    "get_translation_file_from_domain",
 ]
 
 _translation_map = {
-    MOD_DOMAIN.MONSTER: 'monster_stat_descriptions.txt',
-    MOD_DOMAIN.CHEST: 'chest_stat_descriptions.txt',
-    MOD_DOMAIN.AREA: 'map_stat_descriptions.txt',
-    MOD_DOMAIN.ATLAS: 'atlas_stat_descriptions.txt',
-    MOD_DOMAIN.LEAGUESTONE: 'leaguestone_stat_descriptions.txt',
-    MOD_DOMAIN.DELVE_AREA: 'map_stat_descriptions.txt',
-    MOD_DOMAIN.MAP_DEVICE: 'map_stat_descriptions.txt',
+    MOD_DOMAIN.MONSTER: "monster_stat_descriptions.txt",
+    MOD_DOMAIN.CHEST: "chest_stat_descriptions.txt",
+    MOD_DOMAIN.AREA: "map_stat_descriptions.txt",
+    MOD_DOMAIN.ATLAS: "atlas_stat_descriptions.txt",
+    MOD_DOMAIN.LEAGUESTONE: "leaguestone_stat_descriptions.txt",
+    MOD_DOMAIN.DELVE_AREA: "map_stat_descriptions.txt",
+    MOD_DOMAIN.MAP_DEVICE: "map_stat_descriptions.txt",
     # To properly support zana's innate IIQ
-    MOD_DOMAIN.CRAFTED: 'map_stat_descriptions.txt',
+    MOD_DOMAIN.CRAFTED: "map_stat_descriptions.txt",
 }
 
 # =============================================================================
@@ -90,6 +91,7 @@ class SpawnChanceCalculator:
     """
     Class to calculate spawn chances.
     """
+
     def __init__(self, mod_list, tags):
         """
         Parameters
@@ -202,26 +204,24 @@ class SpawnChanceCalculator:
         elif isinstance(mod_or_id, DatRecord):
             mod = mod_or_id
         else:
-            raise TypeError(
-                'mod_or_id is of invalid type "%s"' % type(mod_or_id)
-            )
+            raise TypeError('mod_or_id is of invalid type "%s"' % type(mod_or_id))
 
         weight = self.get_spawn_weight(mod)
-        chance = weight/self.total_spawn_weight
+        chance = weight / self.total_spawn_weight
 
         if remove:
             mods = []
 
             for m in self.mod_list:
-                if m['CorrectGroup'] == mod['CorrectGroup']:
+                if m["CorrectGroup"] == mod["CorrectGroup"]:
                     continue
 
                 mods.append(m)
 
             self.mod_list = mods
 
-            for tag in mod['TagsKeys']:
-                self.tags.append(tag['Id'])
+            for tag in mod["TagsKeys"]:
+                self.tags.append(tag["Id"])
 
             self.total_spawn_weight = self.get_total_spawn_weight()
         return chance
@@ -230,6 +230,7 @@ class SpawnChanceCalculator:
 # =============================================================================
 # Functions
 # =============================================================================
+
 
 def get_translation_file_from_domain(domain):
     """
@@ -248,7 +249,7 @@ def get_translation_file_from_domain(domain):
     try:
         return _translation_map[domain]
     except KeyError:
-        return 'stat_descriptions.txt'
+        return "stat_descriptions.txt"
 
 
 def get_translation(mod, translation_cache, translation_file=None, **kwargs):
@@ -275,7 +276,7 @@ def get_translation(mod, translation_cache, translation_file=None, **kwargs):
     """
     stats = []
     for i in MOD_STATS_RANGE:
-        stat = mod['StatsKey%s' % i]
+        stat = mod["StatsKey%s" % i]
         if stat:
             stats.append(stat)
 
@@ -283,11 +284,11 @@ def get_translation(mod, translation_cache, translation_file=None, **kwargs):
     values = []
     for i, stat in enumerate(stats):
         j = i + 1
-        values.append([mod['Stat%sMin' % j], mod['Stat%sMax' % j]])
-        ids.append(stat['Id'])
+        values.append([mod["Stat%sMin" % j], mod["Stat%sMax" % j]])
+        ids.append(stat["Id"])
 
     if translation_file is None:
-        tf_name = get_translation_file_from_domain(mod['Domain'])
+        tf_name = get_translation_file_from_domain(mod["Domain"])
     else:
         tf_name = translation_file
 
@@ -314,7 +315,7 @@ def get_mod_from_id(mod_id, mod_list):
         Returns the mod if found, None otherwise
     """
     for mod in mod_list:
-        if mod['Id'] == mod_id:
+        if mod["Id"] == mod_id:
             return mod
     return None
 
@@ -337,9 +338,9 @@ def get_spawn_weight(mod, tags):
         Calculated spawn weight
     """
     current_weight = 0
-    for i, tag in enumerate(mod['SpawnWeight_TagsKeys']):
-        weight = mod['SpawnWeight_Values'][i]
-        if tag['Id'] in tags:
+    for i, tag in enumerate(mod["SpawnWeight_TagsKeys"]):
+        weight = mod["SpawnWeight_Values"][i]
+        if tag["Id"] in tags:
             current_weight = weight
             break
 
@@ -347,12 +348,14 @@ def get_spawn_weight(mod, tags):
 
 
 def generate_spawnable_mod_list(
-        mod_dat_file,
-        domain,
-        generation_type,
-        level=1,
-        tags=['default', ]
-        ):
+    mod_dat_file,
+    domain,
+    generation_type,
+    level=1,
+    tags=[
+        "default",
+    ],
+):
     """
     Generates a list of modifiers that can be spawned for the specified
     parameters, i.e. mods that can not spawn will be removed.
@@ -387,22 +390,20 @@ def generate_spawnable_mod_list(
         if generation_type is not a valid MOD_GENERATION_TYPE constant
     """
     if not isinstance(domain, MOD_DOMAIN):
-        raise TypeError('domain must be a MOD_DOMAIN instance.')
+        raise TypeError("domain must be a MOD_DOMAIN instance.")
 
     if not isinstance(generation_type, MOD_GENERATION_TYPE):
-        raise TypeError(
-            'generation_type must be a MOD_GENERATION_TYPE instance.'
-        )
+        raise TypeError("generation_type must be a MOD_GENERATION_TYPE instance.")
 
     mods = []
     for mod in mod_dat_file:
-        if level < mod['Level']:
+        if level < mod["Level"]:
             continue
 
-        if mod['Domain'] != domain:
+        if mod["Domain"] != domain:
             continue
 
-        if mod['GenerationType'] != generation_type:
+        if mod["GenerationType"] != generation_type:
             continue
 
         # Mod can't spawn
@@ -412,6 +413,3 @@ def generate_spawnable_mod_list(
         mods.append(mod)
 
     return mods
-
-
-

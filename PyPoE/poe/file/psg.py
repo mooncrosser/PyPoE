@@ -51,20 +51,22 @@ API for internal use, but still may be useful to work with more directly.
 import struct
 from collections import OrderedDict
 
-# 3rd-party
+from PyPoE.poe.file.dat import DatFile, RelationalReader
+from PyPoE.poe.file.shared import AbstractFileReadOnly
 
 # self
 from PyPoE.shared.mixins import ReprMixin
-from PyPoE.poe.file.shared import AbstractFileReadOnly
-from PyPoE.poe.file.dat import DatFile, RelationalReader
+
+# 3rd-party
+
 
 # =============================================================================
 # Globals
 # =============================================================================
 
-__all__ = ['PSGFile']
+__all__ = ["PSGFile"]
 
-PSG_COL = 'PassiveSkillGraphId'
+PSG_COL = "PassiveSkillGraphId"
 
 # =============================================================================
 # Classes
@@ -95,11 +97,9 @@ class GraphGroup(ReprMixin):
         ?
     """
 
-    __slots__ = ['x', 'y', 'id', 'nodes', 'flag']
+    __slots__ = ["x", "y", "id", "nodes", "flag"]
 
-    _REPR_EXTRA_ATTRIBUTES = OrderedDict((
-        ('nodes', None),
-    ))
+    _REPR_EXTRA_ATTRIBUTES = OrderedDict((("nodes", None),))
 
     def __init__(self, x, y, id, flag):
         """
@@ -153,7 +153,7 @@ class GraphGroupNode(ReprMixin):
 
     A node contains the actual information about the passive skill value it
     holds and the connection as well the as the position within the group.
-    
+
     .. warning::
         If the parent :class:`PSGFile` was instantiated with a valid
         'PassiveSkills.dat' :class:`PyPoE.poe.file.dat.DatFile` instance, the
@@ -180,7 +180,7 @@ class GraphGroupNode(ReprMixin):
         list of passive skill nodes this node is connected to
     """
 
-    __slots__ = ['parent', 'passive_skill', 'radius', 'position', 'connections']
+    __slots__ = ["parent", "passive_skill", "radius", "position", "connections"]
 
     def __init__(self, parent, passive_skill, radius, position, connections):
         """
@@ -193,7 +193,7 @@ class GraphGroupNode(ReprMixin):
         radius :  int
             radius from the parent's x,y-position
         position :  int
-            position of the node in the group; together with the radius this 
+            position of the node in the group; together with the radius this
             creates a clockwise rotation from 0 to 11
         connections : list[int]
             list of passive skill nodes ids this node is connected to
@@ -213,19 +213,15 @@ class GraphGroupNode(ReprMixin):
         dat_reader:  DatReader
             :class:`PyPoE.poe.file.dat.DatReader` instance
         """
-        self.passive_skill = dat_reader.index[PSG_COL][
-            self.passive_skill
-        ]
+        self.passive_skill = dat_reader.index[PSG_COL][self.passive_skill]
         for i, connection in enumerate(self.connections):
-            self.connections[i] = dat_reader.index[PSG_COL][
-                connection
-            ]
+            self.connections[i] = dat_reader.index[PSG_COL][connection]
 
 
 class PSGFile(AbstractFileReadOnly):
     """
     Representation of a .psg (Passive Skill Tree Graph) file.
-    
+
     Parameters
     ----------
     _passive_skills : None or DatReader
@@ -236,7 +232,7 @@ class PSGFile(AbstractFileReadOnly):
         list of :class:`GraphGroup` instances
     """
 
-    EXTENSION = '.psg'
+    EXTENSION = ".psg"
 
     def __init__(self, passive_skills_dat_file=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -249,73 +245,70 @@ class PSGFile(AbstractFileReadOnly):
             self._passive_skills = passive_skills_dat_file.reader
         elif isinstance(passive_skills_dat_file, RelationalReader):
             self._passive_skills = passive_skills_dat_file.get_file(
-                'Data/PassiveSkills.dat'
+                "Data/PassiveSkills.dat"
             ).reader
         elif passive_skills_dat_file is None:
             self._passive_skills = passive_skills_dat_file
         else:
             raise ValueError(
-                'passive_skills_dat_file must be a DatFile instance, a '
-                'RelationalReader instance or None'
+                "passive_skills_dat_file must be a DatFile instance, a "
+                "RelationalReader instance or None"
             )
 
         if self._passive_skills:
-            self._passive_skills.build_index('PassiveSkillGraphId')
+            self._passive_skills.build_index("PassiveSkillGraphId")
 
     def _read(self, buffer, *args, **kwargs):
         data = buffer.read()
         offset = 0
 
         # version?
-        version = struct.unpack_from('<B', data, offset=offset)[0]
+        version = struct.unpack_from("<B", data, offset=offset)[0]
         offset += 1
 
-        unknown_length = 8 
-        #We used to be able to fetch the count of throwaway unknown data from the start of the .psg, but it doesn't work
-        #as of 3.16. Manually, I looked for where there's a 32 bit unsigned int equal to 7, and ignored everything before it.
-        #unknown_length = struct.unpack_from('<B', data, offset=offset)[0]
+        unknown_length = 8
+        # We used to be able to fetch the count of throwaway unknown data from the start of the .psg, but it doesn't work
+        # as of 3.16. Manually, I looked for where there's a 32 bit unsigned int equal to 7, and ignored everything before it.
+        # unknown_length = struct.unpack_from('<B', data, offset=offset)[0]
         offset += 1
 
+        unknown = struct.unpack_from("<" + "B" * unknown_length, data, offset=offset)
+        offset += 1 * unknown_length
 
-        unknown = struct.unpack_from(
-            '<' + 'B'*unknown_length, data, offset=offset
-        )
-        offset += 1*unknown_length
-
-        root_length = struct.unpack_from('<I', data, offset=offset)[0]
-        if(root_length > 1000):
+        root_length = struct.unpack_from("<I", data, offset=offset)[0]
+        if root_length > 1000:
             raise ValueError(
-                f'root_length is unrealistically large at {root_length}.\nStopping to prevent allocating too much memory'
-            ) 
+                f"root_length is unrealistically large at {root_length}.\nStopping to prevent allocating too much memory"
+            )
         offset += 4
 
-        self.root_passives = list(struct.unpack_from(
-            '<' + 'I'*root_length, data, offset=offset
-        ))
-        offset += 4*root_length
+        self.root_passives = list(
+            struct.unpack_from("<" + "I" * root_length, data, offset=offset)
+        )
+        offset += 4 * root_length
 
-        group_length = struct.unpack_from('<I', data, offset=offset)[0]
+        group_length = struct.unpack_from("<I", data, offset=offset)[0]
         offset += 4
 
         self.groups = []
         for i in range(0, group_length):
             x, y, flag, passive_length = struct.unpack_from(
-                '<ffbI', data, offset=offset
+                "<ffbI", data, offset=offset
             )
-            offset += 4*2+4+1
+            offset += 4 * 2 + 4 + 1
 
             group = GraphGroup(x=x, y=y, id=len(self.groups), flag=flag)
 
             for j in range(0, passive_length):
                 rowid, radius, position, connections_length = struct.unpack_from(
-                    '<IIII', data, offset=offset
+                    "<IIII", data, offset=offset
                 )
-                offset += 4*4
+                offset += 4 * 4
 
                 connections = struct.unpack_from(
-                    '<' + 'I'*connections_length, data, offset=offset
+                    "<" + "I" * connections_length, data, offset=offset
                 )
-                offset += 4*connections_length
+                offset += 4 * connections_length
 
                 group.nodes.append(
                     GraphGroupNode(
@@ -350,6 +343,6 @@ class PSGFile(AbstractFileReadOnly):
 # Functions
 # =============================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     psg = PSGFile()
-    psg.read('C:/Temp/Metadata/PassiveSkillGraph.psg')
+    psg.read("C:/Temp/Metadata/PassiveSkillGraph.psg")

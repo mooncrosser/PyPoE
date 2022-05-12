@@ -81,28 +81,32 @@ Exceptions & Warnings
 # Imports
 # =============================================================================
 
+import os
+
 # Python
 import re
 import warnings
-import os
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from typing import Union
 
-# 3rd-party
+from PyPoE.poe.file.file_system import FileSystem
+from PyPoE.poe.file.shared import AbstractFile, ParserError, ParserWarning
+from PyPoE.poe.file.shared.cache import AbstractFileCache
 
 # self
 from PyPoE.shared.decorators import doc
-from PyPoE.poe.file.shared import AbstractFile, ParserError, ParserWarning
-from PyPoE.poe.file.shared.cache import AbstractFileCache
-from PyPoE.poe.file.file_system import FileSystem
+
+# 3rd-party
+
 
 # =============================================================================
 # Globals
 # =============================================================================
 
 __all__ = [
-    'AbstractKeyValueFile', 'AbstractKeyValueFileCache',
-    'AbstractKeyValueSection'
+    "AbstractKeyValueFile",
+    "AbstractKeyValueFileCache",
+    "AbstractKeyValueSection",
 ]
 
 # =============================================================================
@@ -114,6 +118,7 @@ class DuplicateKeyWarning(ParserWarning):
     """
     Warning for keys that are not explicitly specified to be overridden.
     """
+
     pass
 
 
@@ -121,23 +126,24 @@ class OverriddenKeyWarning(ParserWarning):
     """
     Warning for keys that are overridden during a merge.
     """
+
     pass
 
 
 class AbstractKeyValueSection(dict):
     APPEND_KEYS = set()
     ORDERED_HASH_KEYS = set()
-    NAME = ''
+    NAME = ""
 
     def __init__(self, parent, name=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.parent: 'AbstractKeyValueFile' = parent
+        self.parent: "AbstractKeyValueFile" = parent
         if name:
             self.name: str = name
         elif self.NAME:
             self.name: str = self.NAME
         else:
-            raise ParserError('Missing name for section')
+            raise ParserError("Missing name for section")
 
     def __setitem__(self, key, value):
         # Equals "override" behaviour
@@ -147,21 +153,23 @@ class AbstractKeyValueSection(dict):
                     self[key][value] = True
                     return
                 else:
-                    value = OrderedDict(((value, True), ))
+                    value = OrderedDict(((value, True),))
         elif key in self.APPEND_KEYS:
             if not isinstance(value, list):
                 if key in self:
                     self[key].append(value)
                     return
                 else:
-                    value = [value, ]
+                    value = [
+                        value,
+                    ]
         super().__setitem__(key, value)
 
-    def merge(self, other: 'AbstractKeyValueSection'):
+    def merge(self, other: "AbstractKeyValueSection"):
         if not isinstance(other, AbstractKeyValueSection):
             raise TypeError(
                 'Other must be a AbstractKeyValuesSection instance, got "%s" '
-                'instead.' % other.__class__.__name__
+                "instead." % other.__class__.__name__
             )
 
         for k, v in other.items():
@@ -176,7 +184,7 @@ class AbstractKeyValueSection(dict):
                         self[k][v] = True
                         continue
                     else:
-                        v = OrderedDict(((v, True), ))
+                        v = OrderedDict(((v, True),))
             elif k in self.APPEND_KEYS:
                 if isinstance(v, list):
                     if k in self:
@@ -188,7 +196,9 @@ class AbstractKeyValueSection(dict):
                         self[k].append(v)
                         continue
                     else:
-                        v = [v, ]
+                        v = [
+                            v,
+                        ]
             elif k in self:
                 continue
 
@@ -214,46 +224,44 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
     extends : None or str
         Whether the file extends another file
     """
+
     version = None
     extends = None
 
     SECTIONS = {}
 
-    EXTENSION = ''
+    EXTENSION = ""
 
     _re_header = re.compile(
-        r'^'
-        r'version (?P<version>[0-9]+)[\r\n]*'
+        r"^"
+        r"version (?P<version>[0-9]+)[\r\n]*"
         r'extends "(?P<extends>[\w\./_]+)"[\r\n]*'
-        r'(?P<remainder>.*)' # Match the rest
-        r'$',
-        re.UNICODE | re.MULTILINE | re.DOTALL
+        r"(?P<remainder>.*)"  # Match the rest
+        r"$",
+        re.UNICODE | re.MULTILINE | re.DOTALL,
     )
 
     _re_find_kv_sections = re.compile(
-        r'^(?P<key>[\w]+)[\r\n]+'
-        r'^{'
-        r'(?P<contents>[^}]*)'
-        r'^}',
+        r"^(?P<key>[\w]+)[\r\n]+" r"^{" r"(?P<contents>[^}]*)" r"^}",
         re.UNICODE | re.MULTILINE,
     )
 
     _re_find_kv_pairs = re.compile(
-        r'^[\s]*'
-        r'(?P<key>[\S]+)'
-        r'[\s]*=[\s]*'
+        r"^[\s]*"
+        r"(?P<key>[\S]+)"
+        r"[\s]*=[\s]*"
         r'(?P<value>"[^"]*"|[\S]+)'
-        r'[\s]*$',
+        r"[\s]*$",
         re.UNICODE | re.MULTILINE,
     )
 
-    def __init__(self,
-                 parent_or_file_system: Union['AbstractKeyValueFile', FileSystem,
-                                              None] = None,
-                 version: Union[int, None] = None,
-                 extends: Union[str, None] = None,
-                 keys=None
-                 ):
+    def __init__(
+        self,
+        parent_or_file_system: Union["AbstractKeyValueFile", FileSystem, None] = None,
+        version: Union[int, None] = None,
+        extends: Union[str, None] = None,
+        keys=None,
+    ):
         AbstractFile.__init__(self)
         defaultdict.__init__(self, keys)
 
@@ -268,13 +276,13 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
         elif isinstance(parent_or_file_system, FileSystem):
             self._parent_file_system = parent_or_file_system
         elif parent_or_file_system is not None:
-            raise TypeError('parent_or_file_system is of invalid type.')
+            raise TypeError("parent_or_file_system is of invalid type.")
 
     #
     # Properties
     #
     @property
-    def parent_or_file_system(self) -> Union['AbstractKeyValueFile', FileSystem]:
+    def parent_or_file_system(self) -> Union["AbstractKeyValueFile", FileSystem]:
         return self._parent_file or self._parent_file_system
 
     #
@@ -292,43 +300,46 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
         raise NotImplementedError()
 
     def __repr__(self) -> str:
-        return '%(name)s(extends="%(extends)s", version="%(version)s", ' \
-               'keys=%(keys)s' % {
-                    'name': self.__class__.__name__,
-                    'extends': self.extends,
-                    'version': self.version,
-                    'keys': defaultdict.__repr__(self),
-               }
+        return (
+            '%(name)s(extends="%(extends)s", version="%(version)s", '
+            "keys=%(keys)s"
+            % {
+                "name": self.__class__.__name__,
+                "extends": self.extends,
+                "version": self.version,
+                "keys": defaultdict.__repr__(self),
+            }
+        )
 
     @doc(doc=AbstractFile._read)
     def _read(self, buffer, *args, **kwargs):
-        data = buffer.read().decode('utf-16')
+        data = buffer.read().decode("utf-16")
 
         match = self._re_header.match(data)
         if match is None:
-            raise ParserError(
-                'File is not a valid %s file.' % self.__class__.__name__
-            )
+            raise ParserError("File is not a valid %s file." % self.__class__.__name__)
 
-        self.version = int(match.group('version'))
+        self.version = int(match.group("version"))
 
         for section_match in self._re_find_kv_sections.finditer(
-                match.group('remainder')):
-            key = section_match.group('key')
+            match.group("remainder")
+        ):
+            key = section_match.group("key")
 
             try:
                 section = self[key]
             except KeyError:
-                #print('Extra section:', key)
+                # print('Extra section:', key)
                 section = AbstractKeyValueSection(parent=self, name=key)
                 self[key] = section
 
             for kv_match in self._re_find_kv_pairs.finditer(
-                    section_match.group('contents')):
-                value = kv_match.group('value').strip('"')
-                if value == 'true':
+                section_match.group("contents")
+            ):
+                value = kv_match.group("value").strip('"')
+                if value == "true":
                     value = True
-                elif value == 'false':
+                elif value == "false":
                     value = False
                 else:
                     try:
@@ -339,11 +350,11 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
                         except ValueError:
                             pass
 
-                section[kv_match.group('key')] = value
+                section[kv_match.group("key")] = value
 
-        extend = match.group('extends')
+        extend = match.group("extends")
 
-        if extend == 'nothing':
+        if extend == "nothing":
             self.extends = None
         elif extend:
             if self._parent_file:
@@ -355,9 +366,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
                         ParserWarning,
                     )
             elif self._parent_file_system:
-                obj = self.__class__(
-                    parent_or_file_system=self._parent_file_system
-                )
+                obj = self.__class__(parent_or_file_system=self._parent_file_system)
                 obj.read(
                     file_path_or_raw=self._parent_file_system.get_file(
                         extend + self.EXTENSION
@@ -367,30 +376,30 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
             else:
                 raise ParserError(
                     'File extends "%s", but parent_or_file_system has not '
-                    'been specified on class creation.' % extend
+                    "been specified on class creation." % extend
                 )
             self.extends = extend
 
     @doc(doc=AbstractFile._write)
     def _write(self, buffer, *args, **kwargs):
         lines = [
-            'version %s' % self.version,
-            'extends "%s"' % (self.extends if self.extends else 'nothing'),
+            "version %s" % self.version,
+            'extends "%s"' % (self.extends if self.extends else "nothing"),
         ]
 
         for section, keyvalues in self.items():
-            lines.append('')
+            lines.append("")
             lines.append(section)
-            lines.append('{')
+            lines.append("{")
             for key, value in keyvalues.items():
                 if isinstance(value, list):
                     for v in value:
                         lines.append(self._get_write_line(key, v))
                 else:
                     lines.append(self._get_write_line(key, value))
-            lines.append('}')
+            lines.append("}")
 
-        buffer.write('\n'.join(lines).encode('utf-16le'))
+        buffer.write("\n".join(lines).encode("utf-16le"))
 
     @doc(prepend=AbstractFile.write)
     def write(self, *args, **kwargs):
@@ -405,7 +414,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
     def _get_write_line(self, key, value):
         return '\t%s = "%s"' % (key, value)
 
-    def merge(self, other: 'AbstractKeyValueFile'):
+    def merge(self, other: "AbstractKeyValueFile"):
         """
         Merge with other file.
 
@@ -422,7 +431,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
         """
         if not isinstance(other, self.__class__):
             raise ValueError(
-                'Can\'t merge only with classes with the same base class, got '
+                "Can't merge only with classes with the same base class, got "
                 '"%s" instead' % other.__class__.__name__
             )
 
@@ -439,9 +448,11 @@ class AbstractKeyValueFileCache(AbstractFileCache):
     @doc(doc=AbstractFileCache._get_file_instance_args)
     def _get_file_instance_args(self, file_name):
         options = super()._get_file_instance_args(file_name)
-        options['parent_or_file_system'] = self.file_system
+        options["parent_or_file_system"] = self.file_system
 
         return options
+
+
 # =============================================================================
 # Functions
 # =============================================================================

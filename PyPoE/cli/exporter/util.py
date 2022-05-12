@@ -32,18 +32,19 @@ See PyPoE/LICENSE
 # Python
 import re
 
-# self
-from PyPoE.poe.path import PoEPath
 from PyPoE.cli.config import SetupError
 from PyPoE.cli.exporter import config
+
+# self
+from PyPoE.poe.path import PoEPath
 
 # =============================================================================
 # Globals
 # =============================================================================
 
 __all__ = [
-    'get_content_path',
-    'fix_path',
+    "get_content_path",
+    "fix_path",
 ]
 
 # =============================================================================
@@ -61,13 +62,13 @@ def get_content_path():
 
     :raises SetupError: if no valid path was found.
     """
-    path = config.get_option('ggpk_path')
-    if path == '':
-        args = config.get_option('version'), config.get_option('distributor')
+    path = config.get_option("ggpk_path")
+    if path == "":
+        args = config.get_option("version"), config.get_option("distributor")
         paths = PoEPath(*args).get_installation_paths()
 
         if not paths:
-            raise SetupError('No PoE Installation found.')
+            raise SetupError("No PoE Installation found.")
 
         return paths[0]
     else:
@@ -75,7 +76,7 @@ def get_content_path():
 
 
 def fix_path(path: str) -> str:
-    if re.search('[a-zA-Z]:.*', path) is not None:
-        return path[:2] + re.sub(r':', '_', path[2:])
+    if re.search("[a-zA-Z]:.*", path) is not None:
+        return path[:2] + re.sub(r":", "_", path[2:])
     else:
         return path

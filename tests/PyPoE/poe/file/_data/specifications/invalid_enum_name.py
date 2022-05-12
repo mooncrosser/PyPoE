@@ -37,14 +37,16 @@ from PyPoE.poe.file.specification.fields import *
 # Globals
 # =============================================================================
 
-specification = Specification({
-    'Main.dat': File(
-        fields=(
-            Field(
-                name='Invalid',
-                type='int',
-                enum='THIS_DOES_NOT_EXIST',
+specification = Specification(
+    {
+        "Main.dat": File(
+            fields=(
+                Field(
+                    name="Invalid",
+                    type="int",
+                    enum="THIS_DOES_NOT_EXIST",
+                ),
             ),
         ),
-    ),
-})
+    }
+)

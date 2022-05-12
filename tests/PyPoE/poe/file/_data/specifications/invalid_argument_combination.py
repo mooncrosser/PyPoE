@@ -37,19 +37,20 @@ from PyPoE.poe.file.specification.fields import *
 # Globals
 # =============================================================================
 
-specification = Specification({
-    'Main.dat': File(
-        fields=(
-            Field(
-                name='Invalid',
-                type='int',
-                key='Other.dat',
-                enum='MOD_DOMAIN',
+specification = Specification(
+    {
+        "Main.dat": File(
+            fields=(
+                Field(
+                    name="Invalid",
+                    type="int",
+                    key="Other.dat",
+                    enum="MOD_DOMAIN",
+                ),
             ),
         ),
-    ),
-    'Other.dat': File(
-        fields=(
+        "Other.dat": File(
+            fields=(),
         ),
-    ),
-})
+    }
+)

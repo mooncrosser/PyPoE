@@ -1,72 +1,70 @@
-
 class CustomizedField:
-    def __init__(self,
-                 enum: str = None):
+    def __init__(self, enum: str = None):
         self.enum = enum
 
 
 custom_attributes = {
-    'BaseItemTypes.dat': {
-        'ModDomainsKey': CustomizedField(
-            enum='MOD_DOMAIN',
+    "BaseItemTypes.dat": {
+        "ModDomainsKey": CustomizedField(
+            enum="MOD_DOMAIN",
         ),
     },
-    'BestiaryRecipeComponent.dat': {
-        'RarityKey': CustomizedField(
-            enum='RARITY',
+    "BestiaryRecipeComponent.dat": {
+        "RarityKey": CustomizedField(
+            enum="RARITY",
         ),
     },
-    'BetrayalUpgrades.dat': {
-        'BetrayalUpgradeSlotsKey': CustomizedField(
-            enum='BETRAYAL_UPGRADE_SLOTS',
+    "BetrayalUpgrades.dat": {
+        "BetrayalUpgradeSlotsKey": CustomizedField(
+            enum="BETRAYAL_UPGRADE_SLOTS",
         ),
     },
-    'DelveUpgrades.dat': {
-        'DelveUpgradeTypeKey': CustomizedField(
-            enum='DELVE_UPGRADE_TYPE',
+    "DelveUpgrades.dat": {
+        "DelveUpgradeTypeKey": CustomizedField(
+            enum="DELVE_UPGRADE_TYPE",
         ),
     },
-    'GrantedEffectsPerLevel.dat': {
-        'StatInterpolationTypesKeys': CustomizedField(
-            enum='STAT_INTERPOLATION_TYPES',
+    "GrantedEffectsPerLevel.dat": {
+        "StatInterpolationTypesKeys": CustomizedField(
+            enum="STAT_INTERPOLATION_TYPES",
         ),
     },
-    'HarvestObjects.dat': {
-        'ObjectType': CustomizedField(
-            enum='HARVEST_OBJECT_TYPES',
+    "HarvestObjects.dat": {
+        "ObjectType": CustomizedField(
+            enum="HARVEST_OBJECT_TYPES",
         ),
     },
-    'MapFragmentMods.dat': {
-        'MapFragmentFamilies': CustomizedField(
-            enum='MAP_FRAGMENT_FAMILIES',
+    "MapFragmentMods.dat": {
+        "MapFragmentFamilies": CustomizedField(
+            enum="MAP_FRAGMENT_FAMILIES",
         ),
     },
-    'Mods.dat': {
-        'Domain': CustomizedField(
-            enum='MOD_DOMAIN',
+    "Mods.dat": {
+        "Domain": CustomizedField(
+            enum="MOD_DOMAIN",
         ),
-        'GenerationType': CustomizedField(
-            enum='MOD_GENERATION_TYPE',
-        ),
-    },
-    'Scarabs.dat': {
-        'ScarabType': CustomizedField(
-            enum='SCARAB_TYPES',
+        "GenerationType": CustomizedField(
+            enum="MOD_GENERATION_TYPE",
         ),
     },
-    'ShopPaymentPackage.dat': {
-        'ShopPackagePlatformKeys': CustomizedField(
-            enum='SHOP_PACKAGE_PLATFORM',
+    "Scarabs.dat": {
+        "ScarabType": CustomizedField(
+            enum="SCARAB_TYPES",
         ),
     },
-    'SupporterPackSets.dat': {
-        'ShopPackagePlatformKey': CustomizedField(
-            enum='SHOP_PACKAGE_PLATFORM',
+    "ShopPaymentPackage.dat": {
+        "ShopPackagePlatformKeys": CustomizedField(
+            enum="SHOP_PACKAGE_PLATFORM",
         ),
     },
-    'Words.dat': {
-        'WordlistsKey': CustomizedField(
-            enum='WORDLISTS',
+    "SupporterPackSets.dat": {
+        "ShopPackagePlatformKey": CustomizedField(
+            enum="SHOP_PACKAGE_PLATFORM",
+        ),
+    },
+    "Words.dat": {
+        "WordlistsKey": CustomizedField(
+            enum="WORDLISTS",
         ),
     },
 }

@@ -1,0 +1,8 @@
+[flake8]
+ignore = WPS115,Q000,WPS305,WPS306,W503
+per-file-ignores =
+    *tests/*.py:S101
+max-line-length=88
+max-cognitive-complexity=10
+docstring-convention = google # use numpy if you wanna have numpy style docstrings
+extend-ignore = E203, E501

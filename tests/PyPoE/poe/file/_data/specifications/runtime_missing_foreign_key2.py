@@ -37,44 +37,46 @@ from PyPoE.poe.file.specification.fields import *
 # Globals
 # =============================================================================
 
-specification = Specification({
-    'Main.dat': File(
-        fields=(
-            Field(
-                name='ForeignKey',
-                type='int',
-                key='Other.dat',
-                key_id='Value',
-            ),
-            Field(
-                name='ForeignKeyOffset',
-                type='int',
-            ),
-            Field(
-                name='ForeignKeyMismatch',
-                type='int',
-            ),
-            Field(
-                name='ForeignKeyNone',
-                type='int',
-            ),
-            Field(
-                name='ForeignKeyCellValue',
-                type='int',
-            ),
-            Field(
-                name='ConstTest',
-                type='int',
-            ),
-        ),
-    ),
-    'Other.dat': File(
-        fields=(
-            Field(
-                name='Value',
-                type='int',
-                unique=True,
+specification = Specification(
+    {
+        "Main.dat": File(
+            fields=(
+                Field(
+                    name="ForeignKey",
+                    type="int",
+                    key="Other.dat",
+                    key_id="Value",
+                ),
+                Field(
+                    name="ForeignKeyOffset",
+                    type="int",
+                ),
+                Field(
+                    name="ForeignKeyMismatch",
+                    type="int",
+                ),
+                Field(
+                    name="ForeignKeyNone",
+                    type="int",
+                ),
+                Field(
+                    name="ForeignKeyCellValue",
+                    type="int",
+                ),
+                Field(
+                    name="ConstTest",
+                    type="int",
+                ),
             ),
         ),
-    ),
-})
+        "Other.dat": File(
+            fields=(
+                Field(
+                    name="Value",
+                    type="int",
+                    unique=True,
+                ),
+            ),
+        ),
+    }
+)
