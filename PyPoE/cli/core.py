@@ -53,8 +53,10 @@ Functions
 # =============================================================================
 
 # Python
+import argparse
 import sys
 import traceback
+import typing
 import warnings
 from enum import Enum
 from time import strftime
@@ -71,6 +73,7 @@ __all__ = ['Msg', 'OutputHook', 'run', 'console']
 # =============================================================================
 # Classes
 # =============================================================================
+from PyPoE.cli.config import ConfigHelper
 
 
 class Msg(Enum):
@@ -101,7 +104,14 @@ class OutputHook:
         warnings.formatwarning = self.format_warning
         warnings.showwarning = self.show_warning
 
-    def format_warning(self, message, category, filename, lineno, line=None):
+    def format_warning(
+            self,
+            message: str,
+            category: str,
+            filename: str,
+            lineno: str,
+            line: typing.Any = None
+    ) -> typing.Union[None, str]:
         kwargs = {
             'message': message,
             'category': category.__name__,
@@ -112,7 +122,7 @@ class OutputHook:
         f = "%(filename)s:%(lineno)s:\n%(category)s: %(message)s\n" % kwargs
         return console(f, msg=Msg.warning, rtr=True)
     #
-    def show_warning(self, *args, **kwargs):
+    def show_warning(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         self._orig_show_warning(*args, **kwargs)
 
 # =============================================================================
@@ -120,7 +130,7 @@ class OutputHook:
 # =============================================================================
 
 
-def run(parser, config):
+def run(parser: argparse.ArgumentParser, config: ConfigHelper) -> None:
     """
     Run the CLI application with the given parser and config.
 
@@ -155,7 +165,7 @@ def run(parser, config):
     sys.exit(code)
 
 
-def console(message, msg=Msg.default, rtr=False, raw=False):
+def console(message: str, msg: Msg = Msg.default, rtr: bool = False, raw: bool = False):
     """
     Send the specified messge to console
 

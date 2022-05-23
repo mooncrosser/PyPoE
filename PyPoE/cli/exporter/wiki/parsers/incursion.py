@@ -37,7 +37,9 @@ Internal API
 # =============================================================================
 
 # Python
+import argparse
 import os
+import typing
 from functools import partialmethod
 from collections import OrderedDict
 
@@ -48,6 +50,7 @@ from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter import config
 from PyPoE.cli.exporter.wiki import parser
 from PyPoE.cli.exporter.wiki.handler import ExporterHandler, ExporterResult
+from PyPoE.poe.file.dat import DatRecord
 from PyPoE.poe.file.idl import IDLFile
 
 # =============================================================================
@@ -71,7 +74,7 @@ class IncursionRoomWikiCondition(parser.WikiCondition):
 
 
 class IncursionCommandHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser(
             'incursion',
             help='Incursion data exporter',
@@ -90,7 +93,7 @@ class IncursionCommandHandler(ExporterHandler):
             cls=IncursionRoomParser,
         )
 
-    def add_default_parsers(self, *args, **kwargs):
+    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         parser = kwargs['parser']
         self.add_format_argument(parser)
@@ -157,23 +160,23 @@ class IncursionRoomParser(parser.BaseParser):
         'Russian': 'комната вмешательства',
     }
 
-    def by_rowid(self, parsed_args):
+    def by_rowid(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(
             parsed_args,
             self.rr['IncursionRooms.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def by_id(self, parsed_args):
+    def by_id(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._incursion_column_index_filter(
             column_id='Id', arg_list=parsed_args.id
         ))
 
-    def by_name(self, parsed_args):
+    def by_name(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._incursion_column_index_filter(
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def export(self, parsed_args, incursion_rooms):
+    def export(self, parsed_args: argparse.Namespace, incursion_rooms: list[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if not incursion_rooms:

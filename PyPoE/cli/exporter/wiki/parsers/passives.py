@@ -37,8 +37,10 @@ Internal API
 # =============================================================================
 
 # Python
+import argparse
 import re
 import os.path
+import typing
 import warnings
 from functools import partialmethod
 from collections import OrderedDict
@@ -49,6 +51,7 @@ from collections import OrderedDict
 from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter.wiki import parser
 from PyPoE.cli.exporter.wiki.handler import ExporterHandler, ExporterResult
+from PyPoE.poe.file.dat import DatRecord
 from PyPoE.poe.file.psg import PSGFile
 
 # =============================================================================
@@ -73,7 +76,7 @@ class WikiCondition(parser.WikiCondition):
 
 
 class PassiveSkillCommandHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser(
             'passive',
             help='Passive skill exporter',
@@ -103,7 +106,7 @@ class PassiveSkillCommandHandler(ExporterHandler):
             dest='re_id',
         )'''
 
-    def add_default_parsers(self, *args, **kwargs):
+    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         self.add_format_argument(kwargs['parser'])
         self.add_image_arguments(kwargs['parser'])
@@ -192,7 +195,7 @@ class PassiveSkillParser(parser.BaseParser):
         }),
     ))
 
-    def _apply_filter(self, parsed_args, passives):
+    def _apply_filter(self, parsed_args: argparse.Namespace, passives: list[DatRecord]) -> list[DatRecord]:
         if parsed_args.re_id:
             parsed_args.re_id = re.compile(parsed_args.re_id, flags=re.UNICODE)
         else:
@@ -209,23 +212,23 @@ class PassiveSkillParser(parser.BaseParser):
 
         return new
 
-    def by_rowid(self, parsed_args):
+    def by_rowid(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(
             parsed_args,
             self.rr['PassiveSkills.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def by_id(self, parsed_args):
+    def by_id(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._passive_column_index_filter(
             column_id='Id', arg_list=parsed_args.id
         ))
 
-    def by_name(self, parsed_args):
+    def by_name(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._passive_column_index_filter(
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def export(self, parsed_args, passives):
+    def export(self, parsed_args: argparse.Namespace, passives: list[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         passives = self._apply_filter(parsed_args, passives)

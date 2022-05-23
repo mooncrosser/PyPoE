@@ -30,6 +30,7 @@ See PyPoE/LICENSE
 # =============================================================================
 
 # Python
+import argparse
 
 # 3rd-party
 from tqdm import tqdm
@@ -54,7 +55,7 @@ __all__ = []
 
 
 class DatExportHandler:
-    def add_default_arguments(self, parser):
+    def add_default_arguments(self, parser: argparse.ArgumentParser) -> None:
         """
 
         :param parser:
@@ -76,7 +77,7 @@ class DatExportHandler:
             default=None,
         )
 
-    def handle(self, args):
+    def handle(self, args: argparse.Namespace) -> None:
         ver = config.get_option('version')
 
         if ver != VERSION.DEFAULT:
@@ -105,7 +106,7 @@ class DatExportHandler:
 
         args.spec = spec
 
-    def _read_dat_files(self, args, prefix=''):
+    def _read_dat_files(self, args: argparse.Namespace, prefix: str = '') -> dict[str, dat.DatFile]:
         path = get_content_path()
 
         console(prefix + 'Loading file system...')

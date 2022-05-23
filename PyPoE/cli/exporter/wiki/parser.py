@@ -53,7 +53,9 @@ Functions
 # =============================================================================
 
 # Python
+import argparse
 import re
+import typing
 import warnings
 import os
 from collections import OrderedDict
@@ -65,12 +67,12 @@ from PyPoE.cli.exporter import config
 from PyPoE.cli.exporter.util import get_content_path, fix_path
 from PyPoE.poe.constants import MOD_DOMAIN, WORDLISTS, MOD_STATS_RANGE
 from PyPoE.poe.text import parse_description_tags
-from PyPoE.poe.file.dat import RelationalReader, set_default_spec
+from PyPoE.poe.file.dat import RelationalReader, set_default_spec, DatRecord
 from PyPoE.poe.file.translations import (
     TranslationFileCache,
     MissingIdentifierWarning,
     get_custom_translation_file,
-    install_data_dependant_quantifiers,
+    install_data_dependant_quantifiers, TranslationResult,
 )
 from PyPoE.poe.file.file_system import FileSystem
 from PyPoE.poe.file.ot import OTFileCache
@@ -1398,7 +1400,7 @@ _inter_wiki_map = {
 _MAX_RE = 97
 
 
-def _make_inter_wiki_re():
+def _make_inter_wiki_re() -> dict[str, list[typing.Pattern]]:
     out = {}
     for language, _inter_wiki_mapping in _inter_wiki_map.items():
         out[language] = []
@@ -1449,7 +1451,7 @@ class BaseParser:
     _files = []
     _translations = []
 
-    def __init__(self, base_path, parsed_args):
+    def __init__(self, base_path: str, parsed_args: argparse.Namespace) -> None:
         self.parsed_args = parsed_args
         # Make sure to load the appropriate version of the specification
         set_default_spec(version=config.get_option('version'))
@@ -1488,8 +1490,13 @@ class BaseParser:
         self._img_path = None
         self.lang = config.get_option('language')
 
-    def _column_index_filter(self, dat_file_name, column_id, arg_list,
-                             error_msg=_MISSING_MSG):
+    def _column_index_filter(
+            self,
+            dat_file_name: str,
+            column_id: str,
+            arg_list: list[str],
+            error_msg=_MISSING_MSG
+    ) -> list[DatRecord]:
         self.rr[dat_file_name].build_index(column_id)
 
         rows = []
@@ -1515,25 +1522,25 @@ class BaseParser:
 
         return rows
 
-    def _format_tr(self, tr):
+    def _format_tr(self, tr: typing.Union[list[int], list[str], TranslationResult]) -> str:
         return make_inter_wiki_links(self._format_lines(tr.lines))
 
-    def _format_lines(self, lines):
+    def _format_lines(self, lines: list[str]) -> str:
         return '<br>'.join(lines).replace('\n', '<br>')
 
-    def _format_wiki_title(self, title):
+    def _format_wiki_title(self, title: str) -> str:
         return title.replace('_', '~').replace('~~~', '_~~_~~_')
 
-    def _format_hidden(self, custom):
+    def _format_hidden(self, custom: str) -> str:
         return self._HIDDEN_FORMAT[self.lang] % make_inter_wiki_links(custom)
 
-    def _format_detailed(self, custom, ingame):
+    def _format_detailed(self, custom: str, ingame: str) -> str:
         return self._DETAILED_FORMAT % (
             ingame,
             make_inter_wiki_links(custom)
         )
 
-    def _write_dds(self, data, out_path, parsed_args):
+    def _write_dds(self, data: bytes, out_path: str, parsed_args: argparse.Namespace) -> None:
         out_path = fix_path(out_path)
         with open(out_path, 'wb') as f:
             f.write(self.file_system.extract_dds(data))
@@ -1550,14 +1557,14 @@ class BaseParser:
 
         console('Converted "%s" to png' % out_path)
 
-    def _image_init(self, parsed_args):
+    def _image_init(self, parsed_args: argparse.Namespace) -> None:
         if parsed_args.store_images:
             self._img_path = os.path.join(self.base_path, 'img')
             if not os.path.exists(self._img_path):
                 os.makedirs(self._img_path)
 
-    def _get_stats(self, stats=None, values=None, mod=None,
-                   translation_file=None):
+    def _get_stats(self, stats: list[str] = None, values: list[str] = None, mod: DatRecord = None,
+                   translation_file: str = None) -> list[str]:
         if translation_file is None:
             if mod is None:
                 raise ValueError(
@@ -1714,7 +1721,7 @@ class TagHandler:
         for key, func in self.__class__.tag_handlers.items():
             self.tag_handlers[key] = partial(func, self)
 
-    def _check_link(self, string):
+    def _check_link(self, string: str) -> str:
         items = self.rr['BaseItemTypes.dat'].index['Name'][string]
         if items:
             if items[0]['ItemClassesKey']['Name'] == 'Maps':
@@ -1725,16 +1732,16 @@ class TagHandler:
                 string = self._IL_FORMAT % string
         return string
 
-    def _basic_handler(self, hstr, parameter, tid):
+    def _basic_handler(self, hstr: str, parameter: typing.Any, tid: str) -> str:
         return self._C_FORMAT % (tid, hstr)
 
-    def _default_handler(self, hstr, parameter, tid):
+    def _default_handler(self, hstr: str, parameter: typing.Any, tid: str) -> str:
         return self._C_FORMAT % (tid, self._check_link(hstr))
 
-    def _link_handler(self, hstr, parameter, tid):
+    def _link_handler(self, hstr: str, parameter: typing.Any, tid: str) -> str:
         return self._C_FORMAT % (tid, '[[%s]]' % hstr)
 
-    def _unique_handler(self, hstr, parameter):
+    def _unique_handler(self, hstr: str, parameter: typing.Any) -> str:
         words = self.rr['Words.dat'].index['Text'][hstr]
         if words and words[0]['WordlistsKey'] == WORDLISTS.UNIQUE_ITEM:
             # Check whether unique item name clashes with base item name
@@ -1747,7 +1754,7 @@ class TagHandler:
             hstr = self._check_link(hstr)
         return self._C_FORMAT % ('unique', hstr)
 
-    def _currency_handler(self, hstr, parameter):
+    def _currency_handler(self, hstr: str, parameter: typing.Any) -> str:
         if 'x ' in hstr:
             s = hstr.split('x ', maxsplit=1)
             return self._C_FORMAT % (
@@ -1793,14 +1800,14 @@ class WikiCondition:
     INDENT = 33
     ADD_INCLUDE = False
 
-    def __init__(self, data, cmdargs, handler=None):
+    def __init__(self, data: dict, cmdargs: argparse.Namespace, handler: typing.Callable = None) -> None:
         self.data = data
         self.cmdargs = cmdargs
         if handler is None:
             self.handler = self._handler
         self.template_arguments = None
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Union[bool, str]:
         page = kwargs.get('page')
 
         if page is not None:
@@ -1836,10 +1843,10 @@ class WikiCondition:
         else:
             return self.handler(self._get_text())
 
-    def _handler(self, text):
+    def _handler(self, text: str) -> str:
         return text
 
-    def _get_text(self):
+    def _get_text(self) -> str:
         return format_result_rows(
             parsed_args=self.cmdargs,
             template_name=self.NAME,
@@ -1852,8 +1859,8 @@ class WikiCondition:
 # =============================================================================
 
 
-def format_result_rows(parsed_args, ordered_dict, template_name,
-                       indent=DEFAULT_INDENT):
+def format_result_rows(parsed_args: argparse.Namespace, ordered_dict: dict, template_name: str,
+                       indent: int = DEFAULT_INDENT):
     """
     Formats the given result rows as mediawiki template or module.
 
@@ -1890,7 +1897,7 @@ def format_result_rows(parsed_args, ordered_dict, template_name,
     return ''.join(out)
 
 
-def make_inter_wiki_links(string):
+def make_inter_wiki_links(string: str) -> str:
     """
     Formats the given string according to the predefined inter wiki formatting
     rules and returns it.
@@ -1936,7 +1943,7 @@ def make_inter_wiki_links(string):
     return string
 
 
-def find_template(wikitext, template_name):
+def find_template(wikitext: str, template_name: str) -> dict[str, typing.Any]:
     """
     Finds a template within wikitext and parses the arguments.
 
@@ -2043,7 +2050,7 @@ def find_template(wikitext, template_name):
     return {'texts': texts, 'args': arguments, 'kwargs': kw_arguments}
 
 
-def parse_and_handle_description_tags(rr, text):
+def parse_and_handle_description_tags(rr: RelationalReader, text: str) -> str:
     """
     Parses and handles description texts
 

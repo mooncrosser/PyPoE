@@ -35,7 +35,9 @@ FIX the jewel generator (corrupted)
 # =============================================================================
 
 # Python
+import argparse
 import re
+import typing
 import warnings
 from collections import OrderedDict, defaultdict
 from functools import partialmethod
@@ -48,6 +50,8 @@ from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter import config
 from PyPoE.cli.exporter.wiki.handler import ExporterHandler, ExporterResult
 from PyPoE.cli.exporter.wiki.parser import BaseParser, WikiCondition
+from PyPoE.poe.file.dat import DatRecord
+from PyPoE.poe.file.translations import TranslationResult
 from PyPoE.shared.decorators import deprecated
 
 # =============================================================================
@@ -74,7 +78,7 @@ class ModWikiCondition(WikiCondition):
 
 
 class ModsHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser('mods', help='Mods Exporter')
         self.parser.set_defaults(func=lambda args: self.parser.print_help())
         lua_sub = self.parser.add_subparsers()
@@ -148,7 +152,11 @@ class ModParser(BaseParser):
         error_msg='Several areas have not been found:\n%s',
     )
 
-    def _append_effect(self, result, mylist, heading):
+    def _append_effect(
+            self,
+            result: typing.Union[list[int], list[str], TranslationResult], mylist: list[str],
+            heading: str
+    ):
         mylist.append(heading)
 
         for line in result.lines:
@@ -159,23 +167,23 @@ class ModParser(BaseParser):
                 value = '(%s to %s)' % tuple(value)
             mylist.append('* %s %s' % (stat_id, value))
 
-    def by_rowid(self, parsed_args):
+    def by_rowid(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self._export(
             parsed_args,
             self.rr['Mods.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def by_id(self, parsed_args):
+    def by_id(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self._export(parsed_args, self._mod_column_index_filter(
             column_id='Id', arg_list=parsed_args.id
         ))
 
-    def by_name(self, parsed_args):
+    def by_name(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self._export(parsed_args, self._mod_column_index_filter(
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def filter(self, args):
+    def filter(self, args: argparse.Namespace) -> ExporterResult:
         mods = []
 
         filters = []
@@ -200,7 +208,7 @@ class ModParser(BaseParser):
 
         return self._export(args, mods)
 
-    def _export(self, parsed_args, mods):
+    def _export(self, parsed_args: argparse.Namespace, mods: list[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if mods:
@@ -333,7 +341,7 @@ class ModParser(BaseParser):
         return r
 
     @deprecated(message='Will be done in-wiki in the future - non functional')
-    def tempest(self, parsed_args):
+    def tempest(self, parsed_args: argparse.Namespace) -> ExporterResult:
         tf = self.tc['map_stat_descriptions.txt']
         data = []
         for mod in self.rr['Mods.dat']:

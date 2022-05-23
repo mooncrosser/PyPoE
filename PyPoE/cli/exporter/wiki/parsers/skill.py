@@ -32,7 +32,9 @@ See PyPoE/LICENSE
 # =============================================================================
 
 # Python
+import argparse
 import os
+import typing
 import warnings
 import traceback
 from collections import OrderedDict, defaultdict
@@ -42,6 +44,7 @@ from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter import config
 from PyPoE.cli.exporter.wiki.handler import ExporterHandler, ExporterResult
 from PyPoE.cli.exporter.wiki import parser
+from PyPoE.poe.file.dat import DatRecord
 from PyPoE.poe.file.stat_filters import StatFilterFile
 
 # =============================================================================
@@ -61,7 +64,7 @@ __all__ = ['SkillHandler']
 
 
 class SkillHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser('skill', help='Skill data Exporter')
         self.parser.set_defaults(func=lambda args: self.parser.print_help())
         skill_sub = self.parser.add_subparsers()
@@ -105,7 +108,7 @@ class SkillHandler(ExporterHandler):
             type=int,
         )
 
-    def add_default_parsers(self, *args, **kwargs):
+    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         self.add_format_argument(kwargs['parser'])
         self.add_image_arguments(kwargs['parser'])
@@ -286,12 +289,12 @@ class SkillParserShared(parser.BaseParser):
         'WildStrike': 'ElementalStrikeColdProjectile',
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().__init__(*args, **kwargs)
         self._skill_stat_filters = None
 
     @property
-    def skill_stat_filter(self):
+    def skill_stat_filter(self) -> StatFilterFile:
         """
 
         Returns
@@ -308,13 +311,25 @@ class SkillParserShared(parser.BaseParser):
 
         return self._skill_stat_filters
 
-    def _write_stats(self, infobox, stats_and_values, global_prefix):
+    def _write_stats(
+            self,
+            infobox: dict[str, typing.Any],
+            stats_and_values: zip,
+            global_prefix: str
+    ) -> None:
         for i, val in enumerate(stats_and_values):
             prefix = '%sstat%s_' % (global_prefix, (i + 1))
             infobox[prefix + 'id'] = val[0]
             infobox[prefix + 'value'] = val[1]
 
-    def _skill(self, ge, infobox, parsed_args, max_level=None, msg_name=None):
+    def _skill(
+            self,
+            ge: DatRecord,
+            infobox: dict[str, typing.Any],
+            parsed_args: argparse.Namespace,
+            max_level: int = None,
+            msg_name: str = None
+    ) -> typing.Union[bool, None]:
         if msg_name is None:
             msg_name = ge['Id']
 
@@ -717,7 +732,7 @@ class SkillParserShared(parser.BaseParser):
 
 
 class SkillParser(SkillParserShared):
-    def by_id(self, parsed_args):
+    def by_id(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(
             parsed_args,
             self._column_index_filter(
@@ -727,13 +742,13 @@ class SkillParser(SkillParserShared):
             ),
         )
 
-    def by_rowid(self, parsed_args):
+    def by_rowid(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(
             parsed_args,
             self.rr['GrantedEffects.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def export(self, parsed_args, skills):
+    def export(self, parsed_args: argparse.Namespace, skills: list[DatRecord]) -> ExporterResult:
         self._image_init(parsed_args=parsed_args)
         console('Found %s skills, parsing...' % len(skills))
         self.rr['SkillGems.dat'].build_index('GrantedEffectsKey')

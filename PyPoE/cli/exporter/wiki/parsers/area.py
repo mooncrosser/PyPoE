@@ -37,7 +37,9 @@ Interal API
 # =============================================================================
 
 # Python
+import argparse
 import re
+import typing
 from functools import partialmethod
 from collections import OrderedDict
 
@@ -48,6 +50,7 @@ from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter import config
 from PyPoE.cli.exporter.wiki import parser
 from PyPoE.cli.exporter.wiki.handler import ExporterHandler, ExporterResult
+from PyPoE.poe.file.dat import DatRecord
 
 # =============================================================================
 # Globals
@@ -73,7 +76,7 @@ class WikiCondition(parser.WikiCondition):
 
 
 class AreaCommandHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser(
             'area',
             help='Area Exporter',
@@ -156,7 +159,7 @@ class AreaCommandHandler(ExporterHandler):
             dest='re_id',
         )
 
-    def add_default_parsers(self, *args, **kwargs):
+    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         parser = kwargs['parser']
         self.add_format_argument(parser)
@@ -352,23 +355,23 @@ class AreaParser(parser.BaseParser):
         },
     }
 
-    def by_rowid(self, parsed_args):
+    def by_rowid(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(
             parsed_args,
             self.rr['WorldAreas.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def by_id(self, parsed_args):
+    def by_id(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._area_column_index_filter(
             column_id='Id', arg_list=parsed_args.area_id
         ))
 
-    def by_name(self, parsed_args):
+    def by_name(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._area_column_index_filter(
             column_id='Name', arg_list=parsed_args.area_name
         ))
 
-    def by_filter(self, parsed_args):
+    def by_filter(self, parsed_args: argparse.Namespace) -> ExporterResult:
         re_id = re.compile(parsed_args.re_id) if parsed_args.re_id else None
 
         out = []
@@ -380,7 +383,7 @@ class AreaParser(parser.BaseParser):
 
         return self.export(parsed_args, out)
 
-    def export(self, parsed_args, areas):
+    def export(self, parsed_args: argparse.Namespace, areas: list[DatRecord]) -> ExporterResult:
         console('Found %s areas, parsing...' % len(areas))
 
         r = ExporterResult()

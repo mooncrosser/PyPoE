@@ -49,7 +49,7 @@ __all__ = ['JSONExportHandler']
 
 
 class JSONExportHandler(DatExportHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         """
 
         :type sub_parser: argparse._SubParsersAction
@@ -96,7 +96,7 @@ class JSONExportHandler(DatExportHandler):
 
         self.add_default_arguments(self.json)
 
-    def handle(self, args):
+    def handle(self, args: argparse.Namespace):
         super().handle(args)
 
         dict_spec = args.spec.as_dict()

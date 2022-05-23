@@ -31,7 +31,9 @@ Documentation
 # =============================================================================
 
 # Python
+import argparse
 import re
+import typing
 from functools import partialmethod
 from collections import OrderedDict
 
@@ -49,6 +51,7 @@ __all__ = []
 # =============================================================================
 # Classes
 # =============================================================================
+from PyPoE.poe.file.dat import DatRecord
 
 
 class MonsterWikiCondition(parser.WikiCondition):
@@ -64,7 +67,7 @@ class MonsterWikiCondition(parser.WikiCondition):
 
 
 class MonsterCommandHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser(
             'monster',
             help='Monster exporter (non-lua)',
@@ -148,7 +151,7 @@ class MonsterCommandHandler(ExporterHandler):
             dest='re_id',
         )
 
-    def add_default_parsers(self, *args, **kwargs):
+    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         parser = kwargs['parser']
         self.add_format_argument(parser)
@@ -235,23 +238,23 @@ class MonsterParser(parser.BaseParser):
         }),
     ))
 
-    def by_rowid(self, parsed_args):
+    def by_rowid(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(
             parsed_args,
             self.rr['MonsterVarieties.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def by_id(self, parsed_args):
+    def by_id(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._area_column_index_filter(
             column_id='Id', arg_list=parsed_args.monster_id
         ))
 
-    def by_name(self, parsed_args):
+    def by_name(self, parsed_args: argparse.Namespace) -> ExporterResult:
         return self.export(parsed_args, self._area_column_index_filter(
             column_id='Name', arg_list=parsed_args.monster_name
         ))
 
-    def by_filter(self, parsed_args):
+    def by_filter(self, parsed_args: argparse.Namespace) -> ExporterResult:
         re_id = re.compile(parsed_args.re_id) if parsed_args.re_id else None
 
         out = []
@@ -263,7 +266,7 @@ class MonsterParser(parser.BaseParser):
 
         return self.export(parsed_args, out)
 
-    def export(self, parsed_args, monsters):
+    def export(self, parsed_args: argparse.Namespace, monsters: list[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if not monsters:

@@ -97,7 +97,7 @@ _default_spec = None
 __all__ = [
     'DAT_FILE_MAGIC_NUMBER',
     'DatFile', 'RelationalReader',
-    'set_default_spec',
+    'set_default_spec', 'DatRecord'
 ]
 
 DAT_FILE_MAGIC_NUMBER = b'\xBB\xbb\xBB\xbb\xBB\xbb\xBB\xbb'

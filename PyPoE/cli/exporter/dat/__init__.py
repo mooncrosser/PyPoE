@@ -34,6 +34,8 @@ See PyPoE/LICENSE
 # 3rd-party
 
 # self
+import argparse
+
 from PyPoE.cli.exporter.dat.parsers.json import JSONExportHandler
 
 # =============================================================================
@@ -52,7 +54,7 @@ class DatHandler:
 
     :type sql: argparse.ArgumentParser
     """
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         """
 
         :type sub_parser: argparse._SubParsersAction

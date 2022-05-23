@@ -51,7 +51,7 @@ __all__ = [
 # =============================================================================
 
 
-def get_content_path():
+def get_content_path() -> str:
     """
     Returns the path to the current content.ggpk based on the specified
     config variables for the version & distributor.

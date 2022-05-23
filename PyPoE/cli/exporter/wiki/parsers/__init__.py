@@ -55,7 +55,7 @@ __all__ = ['WIKI_HANDLERS']
 # =============================================================================
 
 
-def _load():
+def _load() -> None:
     cur_dir = os.path.split(os.path.realpath(__file__))[0]
     for file_name in os.listdir(cur_dir):
         if file_name.startswith('_'):

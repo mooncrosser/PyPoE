@@ -66,7 +66,7 @@ from PyPoE.cli.exporter.wiki.core import WikiHandler
 # =============================================================================
 
 
-def setup_config():
+def setup_config() -> None:
     config.validator.functions.update({
         'is_version': IntEnumValidator(
             enum=VERSION,
@@ -89,7 +89,7 @@ def setup_config():
                       '"Traditional Chinese", "Korean", default="English")')
 
 
-def main():
+def main() -> None:
     """
     Entry point for the CLI PyPoE exporter
     """

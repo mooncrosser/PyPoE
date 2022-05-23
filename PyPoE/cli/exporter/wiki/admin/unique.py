@@ -36,7 +36,9 @@ Documentation
 # =============================================================================
 
 # Python
+import argparse
 import traceback
+import typing
 from collections import defaultdict
 
 import time
@@ -49,7 +51,7 @@ from rapidfuzz import fuzz
 
 # self
 from PyPoE.poe.constants import WORDLISTS
-from PyPoE.poe.file.dat import RelationalReader
+from PyPoE.poe.file.dat import RelationalReader, DatRecord
 from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter.wiki.parser import BaseParser
 from PyPoE.cli.exporter.wiki.handler import ExporterHandler, add_parser_arguments, WIKIS
@@ -66,7 +68,7 @@ __all__ = []
 
 
 class UniqueCommandHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser(
             'unique',
             help='Unique item administrative utility functions',
@@ -128,7 +130,7 @@ class UniqueCommandHandler(ExporterHandler):
 
 
 class UniqueCopy(BaseParser):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         # Set this up at the earlist so no processing time is wasted
@@ -164,7 +166,14 @@ class UniqueCopy(BaseParser):
             self.cache[row['ItemClassesKey']['Id']].append(row)
             self.cache[row['ItemClassesKey']['Id']].index['Name'][row['Name']].append(row)
 
-    def fuzzy_find_text(self, text, file_name, key, source_list=None, fuzzy_func=fuzz.partial_ratio):
+    def fuzzy_find_text(
+            self,
+            text: str,
+            file_name: str,
+            key: str,
+            source_list: list[DatRecord] = None,
+            fuzzy_func: typing.Callable = fuzz.partial_ratio
+    ) -> str:
         text = text.strip()
 
         if source_list is None:
@@ -210,7 +219,7 @@ class UniqueCopy(BaseParser):
         else:
             return self.rr[file_name][results[0]['id']][key]
 
-    def copy(self, parsed_args, pn):
+    def copy(self, parsed_args: argparse.Namespace, pn: str) -> None:
         console('Processing %s' % pn)
         page = self.site_english.pages[pn]
         if not page.exists:
@@ -314,7 +323,7 @@ class UniqueCopy(BaseParser):
         page.save('%s\n\n[[en:%s]]' % (str(mwtemplate), pn))
         console('Done.')
 
-    def run(self, parsed_args, **kwargs):
+    def run(self, parsed_args: argparse.Namespace, **kwargs) -> None:
         console('Parsing...')
         for item in parsed_args.page:
             self.copy(parsed_args, item)
@@ -327,7 +336,7 @@ class BaseItemCacheInstance(list):
 # Functions
 # =============================================================================
 
-def run():
+def run() -> None:
     cache = defaultdict(BaseItemCacheInstance)
     for row in self.rr_english['BaseItemTypes.dat']:
         cache[row['ItemClassesKey']['Id']].append(row)

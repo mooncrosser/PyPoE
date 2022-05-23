@@ -30,9 +30,12 @@ See PyPoE/LICENSE
 # =============================================================================
 
 # Python
+import argparse
 import os
 
 # 3rd Party
+import typing
+
 from graphviz import Digraph
 
 # Self
@@ -45,7 +48,7 @@ from PyPoE.cli.exporter.wiki.parser import BaseParser
 # =============================================================================
 
 class WarbandsHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser('warbands', help='Warbands Exporter')
         self.parser.set_defaults(func=lambda args: self.parser.print_help())
         lua_sub = self.parser.add_subparsers()
@@ -100,7 +103,7 @@ class WarbandsParser(BaseParser):
     _translations = [
     ]
 
-    def warbands(self, parsed_args):
+    def warbands(self, parsed_args: argparse.Namespace) -> ExporterResult:
         out = []
         for warband in self.rr['WarbandsPackMonsters.dat']:
             out.append(warband['Id'])
@@ -126,7 +129,7 @@ class WarbandsParser(BaseParser):
 
         return r
 
-    def graph(self, parsed_args, **kwargs):
+    def graph(self, parsed_args: argparse.Namespace, **kwargs: typing.Any):
         if parsed_args.type == 'map':
             dat_file = self.rr['WarbandsMapGraph.dat']
             out_file = 'warbands_map_graph.cv'

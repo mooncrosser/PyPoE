@@ -39,9 +39,13 @@ Documentation
 # =============================================================================
 
 # Python
+import argparse
 import traceback
 
 # 3rd Party
+import typing
+
+from setuptools.config import ConfigHandler
 from validate import ValidateError
 
 # self
@@ -68,18 +72,18 @@ class BaseHandler:
     def __init__(self, sub_parser, *args, **kwargs):
         pass
 
-    def _help(self, *args):
+    def _help(self, *args: typing.Any) -> int:
         self.parser.print_help()
         return 0
 
-    def _show_error(self, e):
+    def _show_error(self, e: Exception) -> int:
         console("%s: %s" % (
             e.__class__.__name__,
             ''.join(e.args)
         ), msg=Msg.error)
         return -1
 
-    def print_sep(self, char='-'):
+    def print_sep(self, char: str = '-') -> None:
         console(char*70)
 
 
@@ -92,7 +96,7 @@ class ConfigHandler(BaseHandler):
     .. warning::
         Should be included in any application that uses the cli config
     """
-    def __init__(self, sub_parser, config):
+    def __init__(self, sub_parser: argparse._SubParsersAction, config: ConfigHandler) -> None:
         """
         Parameters
         ----------
@@ -149,7 +153,7 @@ class ConfigHandler(BaseHandler):
             help='Value to set',
         )
 
-    def print_debug(self, args):
+    def print_debug(self, args: argparse.Namespace) -> int:
         """
         Prints out the entire config as string.
 
@@ -166,7 +170,7 @@ class ConfigHandler(BaseHandler):
         console(str(self.config))
         return 0
 
-    def print_all(self, args):
+    def print_all(self, args: argparse.Namespace) -> int:
         """
         Prints all currently registered config variables.
 
@@ -207,7 +211,7 @@ class ConfigHandler(BaseHandler):
 
         return 0
 
-    def get(self, args):
+    def get(self, args: argparse.Namespace) -> int:
         """
         Prints the config setting for the specified var.
 
@@ -224,7 +228,7 @@ class ConfigHandler(BaseHandler):
         console('Config setting "%s" is currently set to:\n%s' % (args.variable, self.config.option[args.variable]))
         return 0
 
-    def set(self, args):
+    def set(self, args: argparse.Namespace) -> int:
         """
         Sets the specified config setting to the specified value.
 
@@ -262,7 +266,7 @@ class SetupHandler(BaseHandler):
     .. warning::
         Should be included in any application that uses the cli config
     """
-    def __init__(self, sub_parser, config):
+    def __init__(self, sub_parser: argparse._SubParsersAction, config: ConfigHandler) -> None:
         """
         Parameters
         ----------
@@ -283,7 +287,7 @@ class SetupHandler(BaseHandler):
         )
         setup_perform.set_defaults(func=self.setup)
 
-    def setup(self, args):
+    def setup(self, args: argparse.Namespace) -> int:
         """
         Performs the setup (if needed)
 

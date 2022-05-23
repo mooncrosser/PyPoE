@@ -32,12 +32,15 @@ See PyPoE/LICENSE
 # =============================================================================
 
 # Python
+import argparse
+import typing
 import warnings
 from collections import OrderedDict, defaultdict
 from functools import partial
 
 # Self
 from PyPoE.poe.constants import RARITY
+from PyPoE.poe.file.dat import DatRecord
 from PyPoE.poe.text import parse_description_tags
 from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter import config
@@ -55,7 +58,7 @@ __all__= ['QuestRewardReader', 'LuaHandler']
 # =============================================================================
 
 
-def lua_format_value(key, value):
+def lua_format_value(key: str, value: str) -> str:
     if isinstance(value, int):
         f = '\t\t%s=%s,\n'
     else:
@@ -64,11 +67,11 @@ def lua_format_value(key, value):
 
 
 class LuaFormatter:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @classmethod
-    def format_module(self, data, indent=0, newline=True):
+    def format_module(self, data: typing.Any, indent: int = 0, newline: bool = True) -> str:
         out = []
         out.append('local data = %s' % self.format_value(
             data, indent=indent+1, newline=newline)
@@ -79,7 +82,7 @@ class LuaFormatter:
         return ''.join(out)
 
     @classmethod
-    def format_key(self, key):
+    def format_key(self, key: typing.Any) -> str:
         if not isinstance(key, str):
             key = str(key)
 
@@ -89,7 +92,7 @@ class LuaFormatter:
         return key
 
     @classmethod
-    def format_value(self, value, indent=2, newline=True):
+    def format_value(self, value: typing.Any, indent: int = 2, newline: bool = True) -> str:
         if isinstance(value, (int, float)):
             if isinstance(value, bool):
                 return str(value).lower()
@@ -138,7 +141,14 @@ class LuaFormatter:
 
 
 class GenericLuaParser(BaseParser):
-    def _copy_from_keys(self, row, keys, out_data=None, index=None, rtr=False):
+    def _copy_from_keys(
+            self,
+            row: DatRecord,
+            keys: tuple,
+            out_data: typing.Any = None,
+            index: int = None,
+            rtr: bool = False
+    ) -> typing.Union[dict, None]:
         copyrow = OrderedDict()
         for k, copy_data in keys:
 
@@ -166,7 +176,7 @@ class GenericLuaParser(BaseParser):
 
 
 class LuaHandler(ExporterHandler):
-    def __init__(self, sub_parser):
+    def __init__(self, sub_parser: argparse._SubParsersAction) -> None:
         self.parser = sub_parser.add_parser('lua', help='Lua Exporter')
         self.parser.set_defaults(func=lambda args: self.parser.print_help())
         lua_sub = self.parser.add_subparsers()
@@ -303,7 +313,7 @@ class MinimapIconsParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         minimap_icons = []
         minimap_icons_lookup = OrderedDict()
 
@@ -344,7 +354,7 @@ class OTStatsParser(GenericLuaParser):
         'merge_with_custom_file': True,
     }
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         r = ExporterResult()
         for data in self._DATA:
             stats = []
@@ -411,7 +421,7 @@ class AtlasParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         atlas_regions = []
         atlas_base_item_types = []
 
@@ -492,7 +502,7 @@ class BestiaryParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         recipes = []
         components = []
         recipe_components_temp = defaultdict(lambda:defaultdict(int))
@@ -587,7 +597,7 @@ class BlightParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         blight_crafting_recipes = []
         blight_crafting_recipes_items = []
         blight_towers = []
@@ -721,7 +731,7 @@ class DelveParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         delve_level_scaling = []
         delve_resources_per_level = []
         delve_upgrades = []
@@ -814,7 +824,7 @@ class HarvestParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         tag_handler = HarvestTagHandler(rr=self.rr)
         harvest_craft_options = []
 
@@ -896,7 +906,7 @@ class HeistParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         heist_areas = []
         for row in self.rr['HeistAreas.dat']:
             self._copy_from_keys(row, self._COPY_KEYS_HEIST_AREAS, heist_areas)
@@ -980,7 +990,7 @@ class PantheonParser(GenericLuaParser):
         }),
     )
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         self.rr['PantheonSouls.dat'].build_index('PantheonPanelLayoutKey')
 
         pantheon = []
@@ -1126,7 +1136,7 @@ class SynthesisParser(GenericLuaParser):
 
     _files = [row['file'] for row in _DATA]
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         data = {}
         for definition in self._DATA:
             data[definition['key']] = []
@@ -1326,7 +1336,7 @@ class MonsterParser(GenericLuaParser):
 
     #_files = [row['files'].keys() in _DATA]
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         data = {}
         for definition in self._DATA:
             data[definition['key']] = []
@@ -1360,7 +1370,7 @@ class MonsterParser(GenericLuaParser):
 
 
 class CraftingBenchParser(GenericLuaParser):
-    def RecipeLocationGenerator(val):
+    def RecipeLocationGenerator(val: dict) -> str:
         text_descriptions = []
         areas = []
         for key in val:
@@ -1372,7 +1382,7 @@ class CraftingBenchParser(GenericLuaParser):
                 areas.append(key['UnlockArea']['Name'])
         return ' • '.join(text_descriptions + areas)
         
-    def DetermineModifier(val):
+    def DetermineModifier(val: dict) -> typing.Any:
         # AddMod value
         if(not val[0] is None and len(val[0]) > 0):
             return val[0]['Id']
@@ -1463,7 +1473,7 @@ class CraftingBenchParser(GenericLuaParser):
 
     _files = ['CraftingBenchOptions.dat']
 
-    def main(self, parsed_args):
+    def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         data = {
             'crafting_bench_options': [],
             'crafting_bench_options_costs': [],
