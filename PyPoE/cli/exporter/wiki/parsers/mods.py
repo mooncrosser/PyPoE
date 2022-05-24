@@ -361,7 +361,7 @@ class ModParser(BaseParser):
 
             info = {}
             info['name'] = mod['Name']
-            effects: typing.List[TranslationResult] = []
+            effects: typing.List[str] = []
 
             stat_ids = [st['Id'] for st in stats]
             stat_values = []

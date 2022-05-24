@@ -60,7 +60,7 @@ from PyPoE.cli.exporter.wiki.parsers.skill import SkillParserShared
 def _apply_column_map(
         infobox: typing.Dict[str, typing.Any],
         column_map: tuple,
-        list_object: typing.Dict[str, typing.Any]
+        list_object: DatRecord
 ) -> None:
     
     for k, data in column_map:
@@ -498,7 +498,7 @@ class ProphecyParser(parser.BaseParser):
         for prophecy in final:
             name = prophecy['Name']
 
-            infobox = OrderedDict()
+            infobox: typing.Dict[str, typing.Any] = OrderedDict()
 
             infobox['rarity_id'] = 'normal'
             infobox['name'] = name
@@ -2592,7 +2592,7 @@ class ItemsParser(SkillParserShared):
         max_level = len(exp_total)-1
         ge = skill_gem['GrantedEffectsKey']
 
-        primary = OrderedDict()
+        primary: typing.Dict[str, typing.Any] = OrderedDict()
         self._skill(ge=ge, infobox=primary, parsed_args=self._parsed_args,
                     msg_name=base_item_type['Name'], max_level=max_level)
 
@@ -2616,7 +2616,7 @@ class ItemsParser(SkillParserShared):
                 second = True
 
         if second:
-            secondary = OrderedDict()
+            secondary: typing.Dict[str, typing.Any] = OrderedDict()
             self._skill(
                 ge=skill_gem['GrantedEffectsKey2'],
                 infobox=secondary,
@@ -3860,7 +3860,7 @@ class ItemsParser(SkillParserShared):
 
             self._print_item_rowid(parsed_args, base_item_type)
 
-            infobox = OrderedDict()
+            infobox: typing.Dict[str, typing.Any] = OrderedDict()
             self._process_base_item_type(base_item_type, infobox)
             self._process_purchase_costs(base_item_type, infobox)
 
@@ -4141,7 +4141,7 @@ class ItemsParser(SkillParserShared):
             tier = row['%sTier' % map_series['Id']]
 
             # Base info
-            infobox = OrderedDict()
+            infobox:typing.Dict[str, typing.Any] = OrderedDict()
             self._process_base_item_type(base_item_type, infobox,
                                          not_new_map=False)
             self._type_map(infobox, base_item_type)
@@ -4178,7 +4178,7 @@ class ItemsParser(SkillParserShared):
                         'Id']
 
                     minimum = 0
-                    connections = defaultdict(
+                    connections: typing.Dict = defaultdict(
                         lambda: ['False' for i in range(0, 5)])
                     for i in range(0, 5):
                         tier = atlas_node['Tier%s' % i]

@@ -326,7 +326,7 @@ class SkillParserShared(parser.BaseParser):
             self,
             ge: DatRecord,
             infobox: typing.Dict[str, typing.Any],
-            parsed_args: argparse.Namespace,
+            parsed_args: typing.Union[argparse.Namespace, None],
             max_level: int = None,
             msg_name: str = None
     ) -> typing.Union[bool, None]:

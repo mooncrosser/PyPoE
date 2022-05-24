@@ -60,7 +60,7 @@ from PyPoE.cli.exporter.wiki.handler import ExporterHandler, add_parser_argument
 # Globals
 # =============================================================================
 
-__all__ = []
+__all__: typing.List[str] = []
 
 # =============================================================================
 # Classes
