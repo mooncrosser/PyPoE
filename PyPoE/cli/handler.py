@@ -45,11 +45,10 @@ import traceback
 # 3rd Party
 import typing
 
-from setuptools.config import ConfigHandler
 from validate import ValidateError
 
 # self
-from PyPoE.cli.config import ConfigError
+from PyPoE.cli.config import ConfigError, ConfigHelper
 from PyPoE.cli.core import console, Msg
 
 # =============================================================================
@@ -96,7 +95,7 @@ class ConfigHandler(BaseHandler):
     .. warning::
         Should be included in any application that uses the cli config
     """
-    def __init__(self, sub_parser: argparse._SubParsersAction, config: ConfigHandler) -> None:
+    def __init__(self, sub_parser: argparse._SubParsersAction, config: ConfigHelper) -> None:
         """
         Parameters
         ----------
@@ -287,7 +286,7 @@ class SetupHandler(BaseHandler):
         )
         setup_perform.set_defaults(func=self.setup)
 
-    def setup(self, args: argparse.Namespace) -> int:
+    def setup(self, args: argparse.Namespace) -> None:
         """
         Performs the setup (if needed)
 

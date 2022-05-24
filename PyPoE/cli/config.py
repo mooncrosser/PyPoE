@@ -116,7 +116,7 @@ class ConfigHelper(ConfigObj):
 
         self.validator = Validator()
         self.validator.functions.update(functions)
-        self._listeners = {}
+        self._listeners: dict[str, typing.Any] = {}
 
     @property
     def option(self) -> configobj.Section:

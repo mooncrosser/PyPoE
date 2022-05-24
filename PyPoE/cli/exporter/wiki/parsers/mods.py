@@ -154,7 +154,7 @@ class ModParser(BaseParser):
 
     def _append_effect(
             self,
-            result: typing.Union[list[int], list[str], TranslationResult], mylist: list[str],
+            result: typing.Union[typing.List[int], typing.List[str], TranslationResult], mylist: typing.List[str],
             heading: str
     ):
         mylist.append(heading)
@@ -208,7 +208,7 @@ class ModParser(BaseParser):
 
         return self._export(args, mods)
 
-    def _export(self, parsed_args: argparse.Namespace, mods: list[DatRecord]) -> ExporterResult:
+    def _export(self, parsed_args: argparse.Namespace, mods: typing.List[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if mods:
@@ -308,7 +308,7 @@ class ModParser(BaseParser):
                 data['tags'] = ', '.join(tags)
 
             if mod['ModTypeKey']:
-                sell_price = defaultdict(int)
+                sell_price: typing.Dict = defaultdict(int)
             for msp in mod['ModTypeKey']['ModSellPriceTypesKeys']:
                 if mod['ModTypeKey']['Name'] != 'SellPriceIsWisdomFragment':
                     for i, (item_id, amount) in enumerate(
@@ -361,7 +361,7 @@ class ModParser(BaseParser):
 
             info = {}
             info['name'] = mod['Name']
-            effects = []
+            effects: typing.List[TranslationResult] = []
 
             stat_ids = [st['Id'] for st in stats]
             stat_values = []

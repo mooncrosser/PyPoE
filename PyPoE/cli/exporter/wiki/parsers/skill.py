@@ -313,7 +313,7 @@ class SkillParserShared(parser.BaseParser):
 
     def _write_stats(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             stats_and_values: zip,
             global_prefix: str
     ) -> None:
@@ -325,7 +325,7 @@ class SkillParserShared(parser.BaseParser):
     def _skill(
             self,
             ge: DatRecord,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             parsed_args: argparse.Namespace,
             max_level: int = None,
             msg_name: str = None
@@ -377,12 +377,12 @@ class SkillParserShared(parser.BaseParser):
 
         # reformat the datas we need
         level_data = []
-        stat_key_order = {
+        stat_key_order: typing.Dict[str, typing.Dict] = {
             'stats': OrderedDict(),
         }
 
         for i, row in enumerate(gepl):
-            data = defaultdict()
+            data: typing.Dict[str, typing.Dict] = defaultdict()
 
             stats = [r['Id'] for j, r in enumerate(row['StatsKeys'])
                      if j < len(row['StatValues'])] + \
@@ -466,7 +466,7 @@ class SkillParserShared(parser.BaseParser):
             'columns': set(self._GEPL_COPY),
             'stats': OrderedDict(stat_key_order['stats']),
         }
-        dynamic = {
+        dynamic: typing.Dict[str, typing.Any] = {
             'columns': set(),
             'stats': OrderedDict(),
         }
@@ -748,7 +748,7 @@ class SkillParser(SkillParserShared):
             self.rr['GrantedEffects.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def export(self, parsed_args: argparse.Namespace, skills: list[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, skills: typing.List[DatRecord]) -> ExporterResult:
         self._image_init(parsed_args=parsed_args)
         console('Found %s skills, parsing...' % len(skills))
         self.rr['SkillGems.dat'].build_index('GrantedEffectsKey')
@@ -760,7 +760,7 @@ class SkillParser(SkillParserShared):
                     f"Skipping skill gem skill \"{skill['Id']}\" at row {skill.rowid}",
                     msg=Msg.warning)
                 continue
-            data = OrderedDict()
+            data: typing.Dict = OrderedDict()
 
             try:
                 self._skill(ge=skill, infobox=data, parsed_args=parsed_args)

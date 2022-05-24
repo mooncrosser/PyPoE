@@ -100,7 +100,7 @@ class WarbandsParser(BaseParser):
     ]
 
     # Load translations in advance
-    _translations = [
+    _translations: typing.List[str] = [
     ]
 
     def warbands(self, parsed_args: argparse.Namespace) -> ExporterResult:

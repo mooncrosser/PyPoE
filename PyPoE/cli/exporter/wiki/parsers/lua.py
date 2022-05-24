@@ -314,7 +314,7 @@ class MinimapIconsParser(GenericLuaParser):
     )
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        minimap_icons = []
+        minimap_icons: typing.List = []
         minimap_icons_lookup = OrderedDict()
 
         for row in self.rr['MinimapIcons.dat']:
@@ -422,8 +422,8 @@ class AtlasParser(GenericLuaParser):
     )
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        atlas_regions = []
-        atlas_base_item_types = []
+        atlas_regions: typing.List = []
+        atlas_base_item_types: typing.List = []
 
         for row in self.rr['AtlasRegions.dat']:
             self._copy_from_keys(row, self._COPY_KEYS_ATLAS_REGIONS,
@@ -503,9 +503,9 @@ class BestiaryParser(GenericLuaParser):
     )
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        recipes = []
-        components = []
-        recipe_components_temp = defaultdict(lambda:defaultdict(int))
+        recipes: typing.List = []
+        components: typing.List = []
+        recipe_components_temp: typing.Dict = defaultdict(lambda:defaultdict(int))
 
         for row in self.rr['BestiaryRecipes.dat']:
             self._copy_from_keys(row, self._COPY_KEYS_BESTIARY, recipes)
@@ -598,9 +598,9 @@ class BlightParser(GenericLuaParser):
     )
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        blight_crafting_recipes = []
-        blight_crafting_recipes_items = []
-        blight_towers = []
+        blight_crafting_recipes: typing.List = []
+        blight_crafting_recipes_items: typing.List = []
+        blight_towers: typing.List = []
 
         self.rr['BlightTowersPerLevel.dat'].build_index('BlightTowersKey')
 
@@ -732,12 +732,12 @@ class DelveParser(GenericLuaParser):
     )
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        delve_level_scaling = []
-        delve_resources_per_level = []
-        delve_upgrades = []
-        delve_upgrade_stats = []
-        fossils = []
-        fossil_weights = []
+        delve_level_scaling: typing.List = []
+        delve_resources_per_level: typing.List = []
+        delve_upgrades: typing.List = []
+        delve_upgrade_stats: typing.List = []
+        fossils: typing.List = []
+        fossil_weights: typing.List = []
 
         for row in self.rr['DelveLevelScaling.dat']:
             self._copy_from_keys(row, self._COPY_KEYS_DELVE_LEVEL_SCALING,
@@ -826,7 +826,7 @@ class HarvestParser(GenericLuaParser):
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         tag_handler = HarvestTagHandler(rr=self.rr)
-        harvest_craft_options = []
+        harvest_craft_options: typing.List = []
 
         for row in self.rr['HarvestCraftOptions.dat']:
             self._copy_from_keys(row, self._COPY_KEYS_HARVEST_CRAFT_OPTIONS,
@@ -907,17 +907,17 @@ class HeistParser(GenericLuaParser):
     )
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        heist_areas = []
+        heist_areas: typing.List = []
         for row in self.rr['HeistAreas.dat']:
             self._copy_from_keys(row, self._COPY_KEYS_HEIST_AREAS, heist_areas)
 
-        heist_jobs = []
+        heist_jobs: typing.List = []
         for row in self.rr['HeistJobs.dat']:
             self._copy_from_keys(row, self._COPY_KEYS_HEIST_JOBS, heist_jobs)
 
-        heist_npcs = []
-        heist_npc_skills = []
-        heist_npc_stats = []
+        heist_npcs: typing.List = []
+        heist_npc_skills: typing.List = []
+        heist_npc_stats: typing.List = []
         for row in self.rr['HeistNPCs.dat']:
             mid = row['MonsterVarietiesKey']['Id']
             self._copy_from_keys(row, self._COPY_KEYS_HEIST_NPCS, heist_npcs)
@@ -993,9 +993,9 @@ class PantheonParser(GenericLuaParser):
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
         self.rr['PantheonSouls.dat'].build_index('PantheonPanelLayoutKey')
 
-        pantheon = []
-        pantheon_souls = []
-        pantheon_stats = []
+        pantheon: typing.List = []
+        pantheon_souls: typing.List = []
+        pantheon_stats: typing.List = []
 
         for row in self.rr['PantheonPanelLayout.dat']:
             if row['IsDisabled']:
@@ -1137,7 +1137,7 @@ class SynthesisParser(GenericLuaParser):
     _files = [row['file'] for row in _DATA]
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        data = {}
+        data: typing.Dict[str, typing.Any] = {}
         for definition in self._DATA:
             data[definition['key']] = []
             for row in self.rr[definition['file']]:
@@ -1337,7 +1337,7 @@ class MonsterParser(GenericLuaParser):
     #_files = [row['files'].keys() in _DATA]
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        data = {}
+        data: typing.Dict[str, typing.Any] = {}
         for definition in self._DATA:
             data[definition['key']] = []
             for row in self.rr[definition['file']]:
@@ -1346,7 +1346,7 @@ class MonsterParser(GenericLuaParser):
                 )
 
         for key, data_map in self._ENUM_DATA.items():
-            map_multi = []
+            map_multi: typing.List = []
             for file_name, definition in data_map.items():
                 for i, row in enumerate(self.rr[file_name]):
                     self._copy_from_keys(
@@ -1474,7 +1474,7 @@ class CraftingBenchParser(GenericLuaParser):
     _files = ['CraftingBenchOptions.dat']
 
     def main(self, parsed_args: argparse.Namespace) -> ExporterResult:
-        data = {
+        data: typing.Dict[str, typing.List] = {
             'crafting_bench_options': [],
             'crafting_bench_options_costs': [],
         }

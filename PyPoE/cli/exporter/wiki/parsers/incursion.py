@@ -57,7 +57,7 @@ from PyPoE.poe.file.idl import IDLFile
 # Globals
 # =============================================================================
 
-__all__ = []
+__all__: typing.List[str] = []
 
 # =============================================================================
 # Classes
@@ -176,7 +176,7 @@ class IncursionRoomParser(parser.BaseParser):
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def export(self, parsed_args: argparse.Namespace, incursion_rooms: list[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, incursion_rooms: typing.List[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if not incursion_rooms:

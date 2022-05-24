@@ -72,7 +72,7 @@ WIKIS = {
 
 
 class WikiHandler:
-    def add_arguments(self, parser: argparse._SubParsersAction) -> None:
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         add_parser_arguments(parser)
         parser.add_argument(
             '-w-mt', '--wiki-max-threads',
@@ -222,7 +222,7 @@ class WikiHandler:
             mwclient: typing.Any,
             result: typing.Any,
             cmdargs: argparse.Namespace,
-            parser: argparse._SubParsersAction
+            parser: argparse.ArgumentParser
     ):
         # First row is handled separately to prompt the user for his password
         url = WIKIS.get(config.get_option('language'))
@@ -273,10 +273,10 @@ class ExporterHandler(BaseHandler):
 
     def get_wrap(
             self,
-            cls: typing.ClassVar,
-            func: typing.Callable,
-            handler: typing.Callable,
-            wiki_handler: typing.Callable
+            cls: typing.Any,
+            func: typing.Union[typing.Callable, None],
+            handler: typing.Union[typing.Callable, None],
+            wiki_handler: typing.Union[typing.Callable, WikiHandler, None]
     ) -> typing.Callable[[argparse.Namespace, typing.Any, typing.Any], int]:
         def wrapper(pargs: argparse.Namespace, *args: typing.Any, **kwargs: typing.Any) -> int:
             # Check outdir, if specified:
@@ -347,7 +347,7 @@ class ExporterHandler(BaseHandler):
     def add_default_subparser_filters(
             self,
             sub_parser: argparse._SubParsersAction,
-            cls: typing.ClassVar,
+            cls: typing.Any,
             *args: typing.Any,
             **kwargs: typing.Any
     ) -> None:
@@ -432,12 +432,12 @@ class ExporterHandler(BaseHandler):
 
     def add_default_parsers(
             self,
-            parser: argparse._SubParsersAction,
-            cls: typing.ClassVar,
+            parser: argparse.ArgumentParser,
+            cls: typing.Any,
             func: typing.Callable = None,
             handler: typing.Callable = None,
             wiki: bool = True,
-            wiki_handler: typing.Callable = None
+            wiki_handler: typing.Union[typing.Callable, WikiHandler] = None
     ) -> None:
         if handler is None:
             for item in (func,):
@@ -469,7 +469,7 @@ class ExporterHandler(BaseHandler):
             action='store_true',
         )
 
-    def add_image_arguments(self, parser: argparse._SubParsersAction) -> None:
+    def add_image_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             '-im', '--store-images',
             help='If specified item 2d art images will be extracted. '
@@ -486,7 +486,7 @@ class ExporterHandler(BaseHandler):
             dest='convert_images',
         )
 
-    def add_format_argument(self, parser: argparse._SubParsersAction) -> None:
+    def add_format_argument(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             '--format',
             help='Output format',
@@ -500,7 +500,7 @@ class ExporterResult(list):
             self,
             text: typing.Any = None,
             out_file: str = None,
-            wiki_page: list[dict[str, typing.Any]] = None,
+            wiki_page: typing.List[typing.Dict[str, typing.Any]] = None,
             wiki_message: str = '',
             **extra: typing.Any
     ) -> None:
@@ -519,7 +519,7 @@ class ExporterResult(list):
 # Functions
 # =============================================================================
 
-def add_parser_arguments(parser: argparse._SubParsersAction) -> None:
+def add_parser_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '-w', '--wiki',
         help='Write to the poewiki page (requires pywikibot)',

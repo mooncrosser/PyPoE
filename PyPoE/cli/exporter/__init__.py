@@ -31,6 +31,7 @@ See PyPoE/LICENSE
 
 # Python
 import os
+import typing
 import warnings
 
 # 3rd-Party
@@ -45,7 +46,7 @@ from PyPoE.cli.core import OutputHook
 # Globals
 # =============================================================================
 
-__all__ = ['CONFIG_PATH', 'config']
+__all__: typing.List[str] = ['CONFIG_PATH', 'config']
 
 CONFIG_PATH = os.path.join(APP_DIR, 'exporter.conf')
 

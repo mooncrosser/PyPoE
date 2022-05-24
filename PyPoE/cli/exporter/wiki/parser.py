@@ -1400,8 +1400,8 @@ _inter_wiki_map = {
 _MAX_RE = 97
 
 
-def _make_inter_wiki_re() -> dict[str, list[typing.Pattern]]:
-    out = {}
+def _make_inter_wiki_re() -> typing.Dict[str, typing.List[typing.Pattern]]:
+    out: dict[str, typing.List[typing.Pattern]] = {}
     for language, _inter_wiki_mapping in _inter_wiki_map.items():
         out[language] = []
         for i in range(0, (len(_inter_wiki_mapping)//_MAX_RE)+1):
@@ -1446,10 +1446,10 @@ class BaseParser:
     }
     _MISSING_MSG = 'Several arguments have not been found:\n%s'
 
-    _TC_KWARGS = {}
+    _TC_KWARGS: typing.Dict = {}
 
-    _files = []
-    _translations = []
+    _files: typing.List[str] = []
+    _translations: typing.List[str] = []
 
     def __init__(self, base_path: str, parsed_args: argparse.Namespace) -> None:
         self.parsed_args = parsed_args
@@ -1494,12 +1494,12 @@ class BaseParser:
             self,
             dat_file_name: str,
             column_id: str,
-            arg_list: list[str],
+            arg_list: typing.List[str],
             error_msg=_MISSING_MSG
-    ) -> list[DatRecord]:
+    ) -> typing.List[DatRecord]:
         self.rr[dat_file_name].build_index(column_id)
 
-        rows = []
+        rows: typing.List[DatRecord] = []
         missing = []
 
         if column_id in self.rr[dat_file_name].columns_unique:
@@ -1522,10 +1522,10 @@ class BaseParser:
 
         return rows
 
-    def _format_tr(self, tr: typing.Union[list[int], list[str], TranslationResult]) -> str:
+    def _format_tr(self, tr: typing.Union[typing.List[int], typing.List[str], TranslationResult]) -> str:
         return make_inter_wiki_links(self._format_lines(tr.lines))
 
-    def _format_lines(self, lines: list[str]) -> str:
+    def _format_lines(self, lines: typing.List[str]) -> str:
         return '<br>'.join(lines).replace('\n', '<br>')
 
     def _format_wiki_title(self, title: str) -> str:
@@ -1563,8 +1563,8 @@ class BaseParser:
             if not os.path.exists(self._img_path):
                 os.makedirs(self._img_path)
 
-    def _get_stats(self, stats: list[str] = None, values: list[str] = None, mod: DatRecord = None,
-                   translation_file: str = None) -> list[str]:
+    def _get_stats(self, stats: typing.List[str] = None, values: typing.List[typing.Union[str, typing.Tuple]] = None, mod: DatRecord = None,
+                   translation_file: str = None) -> typing.List[str]:
         if translation_file is None:
             if mod is None:
                 raise ValueError(
@@ -1943,7 +1943,7 @@ def make_inter_wiki_links(string: str) -> str:
     return string
 
 
-def find_template(wikitext: str, template_name: str) -> dict[str, typing.Any]:
+def find_template(wikitext: str, template_name: str) -> typing.Dict[str, typing.Any]:
     """
     Finds a template within wikitext and parses the arguments.
 
@@ -1989,7 +1989,7 @@ def find_template(wikitext: str, template_name: str) -> dict[str, typing.Any]:
     ], re.UNICODE | re.MULTILINE)
 
     # Returns
-    texts = [[], ]
+    texts: typing.Any = [[], ]
     kw_arguments = OrderedDict()
     arguments = []
 

@@ -58,7 +58,7 @@ from PyPoE.poe.file.psg import PSGFile
 # Globals
 # =============================================================================
 
-__all__ = []
+__all__: typing.List[str] = []
 
 # =============================================================================
 # Classes
@@ -195,7 +195,7 @@ class PassiveSkillParser(parser.BaseParser):
         }),
     ))
 
-    def _apply_filter(self, parsed_args: argparse.Namespace, passives: list[DatRecord]) -> list[DatRecord]:
+    def _apply_filter(self, parsed_args: argparse.Namespace, passives: typing.List[DatRecord]) -> typing.List[DatRecord]:
         if parsed_args.re_id:
             parsed_args.re_id = re.compile(parsed_args.re_id, flags=re.UNICODE)
         else:
@@ -228,7 +228,7 @@ class PassiveSkillParser(parser.BaseParser):
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def export(self, parsed_args: argparse.Namespace, passives: list[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, passives: typing.List[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         passives = self._apply_filter(parsed_args, passives)

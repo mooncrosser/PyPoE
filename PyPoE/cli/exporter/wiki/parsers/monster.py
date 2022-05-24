@@ -41,17 +41,17 @@ from collections import OrderedDict
 from PyPoE.cli.core import console, Msg
 from PyPoE.cli.exporter.wiki.handler import ExporterHandler, ExporterResult
 from PyPoE.cli.exporter.wiki import parser
+from PyPoE.poe.file.dat import DatRecord
 
 # =============================================================================
 # Globals
 # =============================================================================
 
-__all__ = []
+__all__: typing.List[str] = []
 
 # =============================================================================
 # Classes
 # =============================================================================
-from PyPoE.poe.file.dat import DatRecord
 
 
 class MonsterWikiCondition(parser.WikiCondition):
@@ -266,7 +266,7 @@ class MonsterParser(parser.BaseParser):
 
         return self.export(parsed_args, out)
 
-    def export(self, parsed_args: argparse.Namespace, monsters: list[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, monsters: typing.List[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if not monsters:

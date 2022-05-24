@@ -383,7 +383,7 @@ class AreaParser(parser.BaseParser):
 
         return self.export(parsed_args, out)
 
-    def export(self, parsed_args: argparse.Namespace, areas: list[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, areas: typing.List[DatRecord]) -> ExporterResult:
         console('Found %s areas, parsing...' % len(areas))
 
         r = ExporterResult()

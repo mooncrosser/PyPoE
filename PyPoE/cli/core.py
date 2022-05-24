@@ -64,6 +64,9 @@ from time import strftime
 # 3rd Party
 from colorama import Style, Fore
 
+if typing.TYPE_CHECKING:
+    from PyPoE.cli.config import ConfigHelper
+
 # =============================================================================
 # Globals
 # =============================================================================
@@ -73,7 +76,6 @@ __all__ = ['Msg', 'OutputHook', 'run', 'console']
 # =============================================================================
 # Classes
 # =============================================================================
-from PyPoE.cli.config import ConfigHelper
 
 
 class Msg(Enum):
@@ -106,8 +108,8 @@ class OutputHook:
 
     def format_warning(
             self,
-            message: str,
-            category: str,
+            message: typing.Union[typing.Any, str],
+            category: typing.Type[typing.Any],
             filename: str,
             lineno: str,
             line: typing.Any = None
@@ -130,7 +132,7 @@ class OutputHook:
 # =============================================================================
 
 
-def run(parser: argparse.ArgumentParser, config: ConfigHelper) -> None:
+def run(parser: argparse.ArgumentParser, config: 'ConfigHelper') -> None:
     """
     Run the CLI application with the given parser and config.
 

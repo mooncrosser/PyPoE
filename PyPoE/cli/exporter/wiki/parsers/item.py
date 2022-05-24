@@ -58,9 +58,9 @@ from PyPoE.cli.exporter.wiki.parsers.skill import SkillParserShared
 
 
 def _apply_column_map(
-        infobox: dict[str, typing.Any],
+        infobox: typing.Dict[str, typing.Any],
         column_map: tuple,
-        list_object: dict[str, typing.Any]
+        list_object: typing.Dict[str, typing.Any]
 ) -> None:
     
     for k, data in column_map:
@@ -78,10 +78,10 @@ def _type_factory(
         data_mapping: tuple,
         row_index: bool = True,
         function: typing.Callable[
-            [typing.Self, dict[str, typing.Any], DatRecord, DatRecord], typing.Any] = None,
+            [typing.Any, typing.Dict[str, typing.Any], DatRecord, DatRecord], typing.Any] = None,
         fail_condition: bool = False
-) -> typing.Callable[[typing.Self, dict[str, typing.Any], DatRecord], bool]:
-    def func(self: typing.Self, infobox: [dict[str, typing.Any]], base_item_type: DatRecord):
+) -> typing.Callable[[typing.Any, typing.Dict[str, typing.Any], DatRecord], bool]:
+    def func(self: typing.Any, infobox: [typing.Dict[str, typing.Any]], base_item_type: DatRecord):
         try:
             if data_file == 'BaseItemTypes.dat':
                 data = base_item_type
@@ -105,9 +105,9 @@ def _type_factory(
 
 
 # TODO: This looks like dead code
-def _simple_conflict_factory(data: dict[str, typing.Any]) -> typing.Callable[
-                                                             [typing.Self, dict[str, typing.Any]], typing.Any]:
-    def _conflict_handler(self: typing.Self, infobox: dict[str, typing.Any], base_item_type: DatRecord):
+def _simple_conflict_factory(data: typing.Dict[str, typing.Any]) -> typing.Callable[
+                                                             [typing.Any, typing.Dict[str, typing.Any]], typing.Any]:
+    def _conflict_handler(self: typing.Any, infobox: typing.Dict[str, typing.Any], base_item_type: DatRecord):
         appendix = data.get(base_item_type['Id'])
         if appendix is None:
             return base_item_type['Name']
@@ -480,7 +480,7 @@ class ProphecyParser(parser.BaseParser):
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def export(self, parsed_args: argparse.Namespace, prophecies: list[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, prophecies: typing.List[DatRecord]) -> ExporterResult:
         final = []
         for prophecy in prophecies:
             if not prophecy['IsEnabled'] and not parsed_args.allow_disabled:
@@ -2552,7 +2552,7 @@ class ItemsParser(SkillParserShared):
         else:
             self.rr2 = None
 
-    def _skill_gem(self, infobox: dict[str, typing.Any], base_item_type: DatRecord) -> bool:
+    def _skill_gem(self, infobox: typing.Dict[str, typing.Any], base_item_type: DatRecord) -> bool:
         try:
             skill_gem = self.rr['SkillGems.dat'].index['BaseItemTypesKey'][
                 base_item_type.rowid]
@@ -2731,7 +2731,7 @@ class ItemsParser(SkillParserShared):
 
         return True
 
-    def _type_level(self, infobox: dict[str, typing.Any], base_item_type: DatRecord) -> bool:
+    def _type_level(self, infobox: typing.Dict[str, typing.Any], base_item_type: DatRecord) -> bool:
         infobox['required_level'] = base_item_type['DropLevel']
 
         return True
@@ -2755,7 +2755,7 @@ class ItemsParser(SkillParserShared):
         row_index=False,
     )
 
-    def _type_amulet(self, infobox: dict[str, typing.Any], base_item_type: DatRecord) -> bool:
+    def _type_amulet(self, infobox: typing.Dict[str, typing.Any], base_item_type: DatRecord) -> bool:
         match = re.search('Talisman([0-9])', base_item_type['Id'])
         if match:
             infobox['is_talisman'] = True
@@ -2818,7 +2818,7 @@ class ItemsParser(SkillParserShared):
 
     def _apply_flask_buffs(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             flasks: DatRecord
     ) -> None:
@@ -2902,7 +2902,7 @@ class ItemsParser(SkillParserShared):
 
     def _currency_extra(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             currency: DatRecord
     ) -> bool:
@@ -2982,7 +2982,7 @@ class ItemsParser(SkillParserShared):
 
     def _maps_extra(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             maps: DatRecord
     ) -> None:
@@ -3064,7 +3064,7 @@ class ItemsParser(SkillParserShared):
 
     def _map_fragment_extra(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             map_fragment_mods: DatRecord
     ):
@@ -3086,7 +3086,7 @@ class ItemsParser(SkillParserShared):
 
     def _essence_extra(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             essence: DatRecord
     ) -> bool:
@@ -3132,7 +3132,7 @@ class ItemsParser(SkillParserShared):
             )
             out[-1] += '<br />'
 
-        def add_line(text: str, mod=list[str]) -> None:
+        def add_line(text: str, mod=typing.List[str]) -> None:
             nonlocal out
             out.append('%s: %s' % (
                 text, ''.join(self._get_stats(mod=mod))
@@ -3244,7 +3244,7 @@ class ItemsParser(SkillParserShared):
 
     def _harvest_seed_extra(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             harvest_object: DatRecord
     ) -> bool:
@@ -3308,7 +3308,7 @@ class ItemsParser(SkillParserShared):
 
     def _harvest_plant_booster_extra(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             harvest_object: DatRecord
     ) -> bool:
@@ -3458,7 +3458,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_active_skill_gems(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3472,7 +3472,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_quest_items(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3524,7 +3524,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_hideout_doodad(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3559,7 +3559,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_maps(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3584,7 +3584,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_map_fragments(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3593,7 +3593,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_divination_card(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3602,7 +3602,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_labyrinth_map_item(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3611,7 +3611,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_misc_map_item(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3620,7 +3620,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_delve_socketable_currency(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3629,7 +3629,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_delve_stackable_socketable_currency(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3638,7 +3638,7 @@ class ItemsParser(SkillParserShared):
 
     def _conflict_atlas_region_upgrade(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             rr: RelationalReader,
             language: str
@@ -3661,7 +3661,7 @@ class ItemsParser(SkillParserShared):
         'AtlasRegionUpgradeItem': _conflict_atlas_region_upgrade,
     }
 
-    def _parse_class_filter(self, parsed_args: argparse.Namespace) -> list[str]:
+    def _parse_class_filter(self, parsed_args: argparse.Namespace) -> typing.List[str]:
         if parsed_args.item_class_id:
             return [self.rr['ItemClasses.dat'].index['Id'][cls]['Name']
                     for cls in parsed_args.item_class_id]
@@ -3672,7 +3672,7 @@ class ItemsParser(SkillParserShared):
         else:
             return []
 
-    def _process_purchase_costs(self, source: DatRecord, infobox: dict[str, typing.Any]) -> None:
+    def _process_purchase_costs(self, source: DatRecord, infobox: typing.Dict[str, typing.Any]) -> None:
         for rarity in RARITY:
             if rarity.id >= 5:
                 break
@@ -3722,7 +3722,7 @@ class ItemsParser(SkillParserShared):
 
         return self._export(parsed_args, items)
 
-    def _process_base_item_type(self, base_item_type: DatRecord, infobox: dict[str, typing.Any],
+    def _process_base_item_type(self, base_item_type: DatRecord, infobox: typing.Dict[str, typing.Any],
                                 not_new_map: bool = True):
             m_id = base_item_type['Id']
 
@@ -3780,7 +3780,7 @@ class ItemsParser(SkillParserShared):
 
     def _process_name_conflicts(
             self,
-            infobox: dict[str, typing.Any],
+            infobox: typing.Dict[str, typing.Any],
             base_item_type: DatRecord,
             language: str
     ) -> typing.Union[str, None]:

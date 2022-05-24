@@ -171,7 +171,7 @@ class UniqueCopy(BaseParser):
             text: str,
             file_name: str,
             key: str,
-            source_list: list[DatRecord] = None,
+            source_list: typing.List[DatRecord] = None,
             fuzzy_func: typing.Callable = fuzz.partial_ratio
     ) -> str:
         text = text.strip()
