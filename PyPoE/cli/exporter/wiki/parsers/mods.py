@@ -37,7 +37,7 @@ FIX the jewel generator (corrupted)
 # Python
 import argparse
 import re
-import typing
+from typing import Dict, List, Union
 import warnings
 from collections import OrderedDict, defaultdict
 from functools import partialmethod
@@ -154,7 +154,7 @@ class ModParser(BaseParser):
 
     def _append_effect(
             self,
-            result: typing.Union[typing.List[int], typing.List[str], TranslationResult], mylist: typing.List[str],
+            result: Union[List[int], List[str], TranslationResult], mylist: List[str],
             heading: str
     ):
         mylist.append(heading)
@@ -208,7 +208,7 @@ class ModParser(BaseParser):
 
         return self._export(args, mods)
 
-    def _export(self, parsed_args: argparse.Namespace, mods: typing.List[DatRecord]) -> ExporterResult:
+    def _export(self, parsed_args: argparse.Namespace, mods: List[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if mods:
@@ -308,7 +308,7 @@ class ModParser(BaseParser):
                 data['tags'] = ', '.join(tags)
 
             if mod['ModTypeKey']:
-                sell_price: typing.Dict = defaultdict(int)
+                sell_price: Dict = defaultdict(int)
             for msp in mod['ModTypeKey']['ModSellPriceTypesKeys']:
                 if mod['ModTypeKey']['Name'] != 'SellPriceIsWisdomFragment':
                     for i, (item_id, amount) in enumerate(
@@ -361,7 +361,7 @@ class ModParser(BaseParser):
 
             info = {}
             info['name'] = mod['Name']
-            effects: typing.List[str] = []
+            effects: List[str] = []
 
             stat_ids = [st['Id'] for st in stats]
             stat_values = []

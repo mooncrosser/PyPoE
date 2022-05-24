@@ -39,7 +39,7 @@ Interal API
 # Python
 import argparse
 import re
-import typing
+from typing import Any, List
 from functools import partialmethod
 from collections import OrderedDict
 
@@ -56,7 +56,7 @@ from PyPoE.poe.file.dat import DatRecord
 # Globals
 # =============================================================================
 
-__all__: typing.List[str] = []
+__all__: List[str] = []
 
 # =============================================================================
 # Classes
@@ -159,7 +159,7 @@ class AreaCommandHandler(ExporterHandler):
             dest='re_id',
         )
 
-    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def add_default_parsers(self, *args: Any, **kwargs: Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         parser = kwargs['parser']
         self.add_format_argument(parser)
@@ -383,7 +383,7 @@ class AreaParser(parser.BaseParser):
 
         return self.export(parsed_args, out)
 
-    def export(self, parsed_args: argparse.Namespace, areas: typing.List[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, areas: List[DatRecord]) -> ExporterResult:
         console('Found %s areas, parsing...' % len(areas))
 
         r = ExporterResult()

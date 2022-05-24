@@ -39,7 +39,7 @@ Internal API
 # Python
 import argparse
 import os
-import typing
+from typing import Any, List
 from functools import partialmethod
 from collections import OrderedDict
 
@@ -57,7 +57,7 @@ from PyPoE.poe.file.idl import IDLFile
 # Globals
 # =============================================================================
 
-__all__: typing.List[str] = []
+__all__: List[str] = []
 
 # =============================================================================
 # Classes
@@ -93,7 +93,7 @@ class IncursionCommandHandler(ExporterHandler):
             cls=IncursionRoomParser,
         )
 
-    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def add_default_parsers(self, *args: Any, **kwargs: Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         parser = kwargs['parser']
         self.add_format_argument(parser)
@@ -176,7 +176,7 @@ class IncursionRoomParser(parser.BaseParser):
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def export(self, parsed_args: argparse.Namespace, incursion_rooms: typing.List[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, incursion_rooms: List[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         if not incursion_rooms:

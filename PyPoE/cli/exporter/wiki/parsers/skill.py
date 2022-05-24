@@ -34,7 +34,7 @@ See PyPoE/LICENSE
 # Python
 import argparse
 import os
-import typing
+from typing import Any, Dict, List, Union
 import warnings
 import traceback
 from collections import OrderedDict, defaultdict
@@ -108,7 +108,7 @@ class SkillHandler(ExporterHandler):
             type=int,
         )
 
-    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def add_default_parsers(self, *args: Any, **kwargs: Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         self.add_format_argument(kwargs['parser'])
         self.add_image_arguments(kwargs['parser'])
@@ -289,7 +289,7 @@ class SkillParserShared(parser.BaseParser):
         'WildStrike': 'ElementalStrikeColdProjectile',
     }
 
-    def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._skill_stat_filters = None
 
@@ -313,7 +313,7 @@ class SkillParserShared(parser.BaseParser):
 
     def _write_stats(
             self,
-            infobox: typing.Dict[str, typing.Any],
+            infobox: Dict[str, Any],
             stats_and_values: zip,
             global_prefix: str
     ) -> None:
@@ -325,11 +325,11 @@ class SkillParserShared(parser.BaseParser):
     def _skill(
             self,
             ge: DatRecord,
-            infobox: typing.Dict[str, typing.Any],
-            parsed_args: typing.Union[argparse.Namespace, None],
+            infobox: Dict[str, Any],
+            parsed_args: Union[argparse.Namespace, None],
             max_level: int = None,
             msg_name: str = None
-    ) -> typing.Union[bool, None]:
+    ) -> Union[bool, None]:
         if msg_name is None:
             msg_name = ge['Id']
 
@@ -377,12 +377,12 @@ class SkillParserShared(parser.BaseParser):
 
         # reformat the datas we need
         level_data = []
-        stat_key_order: typing.Dict[str, typing.Dict] = {
+        stat_key_order: Dict[str, Dict] = {
             'stats': OrderedDict(),
         }
 
         for i, row in enumerate(gepl):
-            data: typing.Dict[str, typing.Dict] = defaultdict()
+            data: Dict[str, Dict] = defaultdict()
 
             stats = [r['Id'] for j, r in enumerate(row['StatsKeys'])
                      if j < len(row['StatValues'])] + \
@@ -466,7 +466,7 @@ class SkillParserShared(parser.BaseParser):
             'columns': set(self._GEPL_COPY),
             'stats': OrderedDict(stat_key_order['stats']),
         }
-        dynamic: typing.Dict[str, typing.Any] = {
+        dynamic: Dict[str, Any] = {
             'columns': set(),
             'stats': OrderedDict(),
         }
@@ -748,7 +748,7 @@ class SkillParser(SkillParserShared):
             self.rr['GrantedEffects.dat'][parsed_args.start:parsed_args.end],
         )
 
-    def export(self, parsed_args: argparse.Namespace, skills: typing.List[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, skills: List[DatRecord]) -> ExporterResult:
         self._image_init(parsed_args=parsed_args)
         console('Found %s skills, parsing...' % len(skills))
         self.rr['SkillGems.dat'].build_index('GrantedEffectsKey')
@@ -760,7 +760,7 @@ class SkillParser(SkillParserShared):
                     f"Skipping skill gem skill \"{skill['Id']}\" at row {skill.rowid}",
                     msg=Msg.warning)
                 continue
-            data: typing.Dict = OrderedDict()
+            data: Dict = OrderedDict()
 
             try:
                 self._skill(ge=skill, infobox=data, parsed_args=parsed_args)

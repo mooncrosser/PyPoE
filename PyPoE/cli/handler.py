@@ -43,7 +43,7 @@ import argparse
 import traceback
 
 # 3rd Party
-import typing
+from typing import Any
 
 from validate import ValidateError
 
@@ -71,7 +71,7 @@ class BaseHandler:
     def __init__(self, sub_parser, *args, **kwargs):
         pass
 
-    def _help(self, *args: typing.Any) -> int:
+    def _help(self, *args: Any) -> int:
         self.parser.print_help()
         return 0
 

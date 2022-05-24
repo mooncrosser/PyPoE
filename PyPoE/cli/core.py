@@ -56,7 +56,7 @@ Functions
 import argparse
 import sys
 import traceback
-import typing
+from typing import Any, Union, Type, TYPE_CHECKING
 import warnings
 from enum import Enum
 from time import strftime
@@ -64,7 +64,7 @@ from time import strftime
 # 3rd Party
 from colorama import Style, Fore
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from PyPoE.cli.config import ConfigHelper
 
 # =============================================================================
@@ -108,12 +108,12 @@ class OutputHook:
 
     def format_warning(
             self,
-            message: typing.Union[typing.Any, str],
-            category: typing.Type[typing.Any],
+            message: Union[Any, str],
+            category: Type[Any],
             filename: str,
             lineno: str,
-            line: typing.Any = None
-    ) -> typing.Union[None, str]:
+            line: Any = None
+    ) -> Union[None, str]:
         kwargs = {
             'message': message,
             'category': category.__name__,
@@ -124,7 +124,7 @@ class OutputHook:
         f = "%(filename)s:%(lineno)s:\n%(category)s: %(message)s\n" % kwargs
         return console(f, msg=Msg.warning, rtr=True)
     #
-    def show_warning(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def show_warning(self, *args: Any, **kwargs: Any) -> None:
         self._orig_show_warning(*args, **kwargs)
 
 # =============================================================================

@@ -38,7 +38,7 @@ Documentation
 # Python
 import argparse
 import traceback
-import typing
+from typing import List, Callable
 from collections import defaultdict
 
 import time
@@ -60,7 +60,7 @@ from PyPoE.cli.exporter.wiki.handler import ExporterHandler, add_parser_argument
 # Globals
 # =============================================================================
 
-__all__: typing.List[str] = []
+__all__: List[str] = []
 
 # =============================================================================
 # Classes
@@ -171,8 +171,8 @@ class UniqueCopy(BaseParser):
             text: str,
             file_name: str,
             key: str,
-            source_list: typing.List[DatRecord] = None,
-            fuzzy_func: typing.Callable = fuzz.partial_ratio
+            source_list: List[DatRecord] = None,
+            fuzzy_func: Callable = fuzz.partial_ratio
     ) -> str:
         text = text.strip()
 

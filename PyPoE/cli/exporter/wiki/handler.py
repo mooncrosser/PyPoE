@@ -34,7 +34,7 @@ import argparse
 import os
 import time
 import re
-import typing
+from typing import Any, Callable, Dict, List, Union
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import HTTPError
@@ -98,7 +98,7 @@ class WikiHandler:
             default=0,
         )
 
-    def _error_catcher(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def _error_catcher(self, *args: Any, **kwargs: Any) -> None:
         fail = 1
         while fail > 0:
             try:
@@ -124,7 +124,7 @@ class WikiHandler:
                     )
                     fail += 1
 
-    def handle_page(self, *a: typing.Any, row: typing.Any):
+    def handle_page(self, *a: Any, row: Any):
         if isinstance(row['wiki_page'], str):
             pages = [
                 {'page': row['wiki_page'], 'condition': None},
@@ -218,9 +218,9 @@ class WikiHandler:
 
     def handle(
             self,
-            *a: typing.Any,
-            mwclient: typing.Any,
-            result: typing.Any,
+            *a: Any,
+            mwclient: Any,
+            result: Any,
             cmdargs: argparse.Namespace,
             parser: argparse.ArgumentParser
     ):
@@ -268,17 +268,17 @@ class WikiHandler:
 
 
 class ExporterHandler(BaseHandler):
-    def __init__(self, *args: typing.Any, **kwargs: typing.Any):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
     def get_wrap(
             self,
-            cls: typing.Any,
-            func: typing.Union[typing.Callable, None],
-            handler: typing.Union[typing.Callable, None],
-            wiki_handler: typing.Union[typing.Callable, WikiHandler, None]
-    ) -> typing.Callable[[argparse.Namespace, typing.Any, typing.Any], int]:
-        def wrapper(pargs: argparse.Namespace, *args: typing.Any, **kwargs: typing.Any) -> int:
+            cls: Any,
+            func: Union[Callable, None],
+            handler: Union[Callable, None],
+            wiki_handler: Union[Callable, WikiHandler, None]
+    ) -> Callable[[argparse.Namespace, Any, Any], int]:
+        def wrapper(pargs: argparse.Namespace, *args: Any, **kwargs: Any) -> int:
             # Check outdir, if specified:
             if hasattr(pargs, 'outdir') and pargs.outdir:
                 out_dir = pargs.outdir
@@ -347,9 +347,9 @@ class ExporterHandler(BaseHandler):
     def add_default_subparser_filters(
             self,
             sub_parser: argparse._SubParsersAction,
-            cls: typing.Any,
-            *args: typing.Any,
-            **kwargs: typing.Any
+            cls: Any,
+            *args: Any,
+            **kwargs: Any
     ) -> None:
         """
         Adds default sub parsers for id, name and rowid.
@@ -433,11 +433,11 @@ class ExporterHandler(BaseHandler):
     def add_default_parsers(
             self,
             parser: argparse.ArgumentParser,
-            cls: typing.Any,
-            func: typing.Callable = None,
-            handler: typing.Callable = None,
+            cls: Any,
+            func: Callable = None,
+            handler: Callable = None,
             wiki: bool = True,
-            wiki_handler: typing.Union[typing.Callable, WikiHandler] = None
+            wiki_handler: Union[Callable, WikiHandler] = None
     ) -> None:
         if handler is None:
             for item in (func,):
@@ -498,11 +498,11 @@ class ExporterHandler(BaseHandler):
 class ExporterResult(list):
     def add_result(
             self,
-            text: typing.Any = None,
+            text: Any = None,
             out_file: str = None,
-            wiki_page: typing.List[typing.Dict[str, typing.Any]] = None,
+            wiki_page: List[Dict[str, Any]] = None,
             wiki_message: str = '',
-            **extra: typing.Any
+            **extra: Any
     ) -> None:
         data = {
             'text': text,

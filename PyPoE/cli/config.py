@@ -47,8 +47,7 @@ See PyPoE/LICENSE
 
 # Python
 import sys
-import typing
-from collections.abc import Iterable
+from typing import Any, Callable, Iterable, Union
 
 # 3rd party
 import configobj
@@ -92,7 +91,7 @@ class ConfigHelper(ConfigObj):
     Generally the new options should be used over the direct usage of inherited
     functions.
     """
-    def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Raises
         ------
@@ -116,7 +115,7 @@ class ConfigHelper(ConfigObj):
 
         self.validator = Validator()
         self.validator.functions.update(functions)
-        self._listeners: dict[str, typing.Any] = {}
+        self._listeners: dict[str, Any] = {}
 
     @property
     def option(self) -> configobj.Section:
@@ -183,7 +182,7 @@ class ConfigHelper(ConfigObj):
             raise KeyError('Duplicate key: %s' % key)
         self.optionspec[key] = specification
 
-    def get_option(self, key: str, safe: bool = True) -> typing.Any:
+    def get_option(self, key: str, safe: bool = True) -> Any:
         """
         Returns the handled value for the specified key from the config.
 
@@ -228,7 +227,7 @@ class ConfigHelper(ConfigObj):
 
         return self.validator.check(self.optionspec[key], value)
 
-    def set_option(self, key: str, value: typing.Any):
+    def set_option(self, key: str, value: Any):
         """
         Sets the key to the specified value.
 
@@ -260,7 +259,7 @@ class ConfigHelper(ConfigObj):
 
         self.option[key] = value
 
-    def register_setup(self, key: str, funcs: typing.Union[typing.Callable, typing.Iterable[typing.Callable]]) -> None:
+    def register_setup(self, key: str, funcs: Union[Callable, Iterable[Callable]]) -> None:
         """
         Registers one or multiple functions that will be called to perform
         the setup for the specified config key.
@@ -312,7 +311,7 @@ class ConfigHelper(ConfigObj):
     def add_setup_listener(
             self,
             config_key: str,
-            function: typing.Callable
+            function: Callable
     ) -> None:
         """
         Adds a listener for the specified config key that triggers when the
@@ -373,7 +372,7 @@ class ConfigHelper(ConfigObj):
             raise KeyError('Duplicate key: %s' % variable_key)
         self.setupspec[setup_key][variable_key] = specification
 
-    def get_setup_variable(self, setup_key: str, variable_key: str) -> typing.Any:
+    def get_setup_variable(self, setup_key: str, variable_key: str) -> Any:
         """
         Returns the stored variable for the specified setup key
 
@@ -391,7 +390,7 @@ class ConfigHelper(ConfigObj):
         """
         return self.setup[setup_key][variable_key]
 
-    def set_setup_variable(self, setup_key: str, variable_key: str, value: typing.Any):
+    def set_setup_variable(self, setup_key: str, variable_key: str, value: Any):
         """
         Sets the value for the specified setup key and variable
 

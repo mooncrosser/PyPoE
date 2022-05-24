@@ -31,7 +31,7 @@ See PyPoE/LICENSE
 
 # Python
 import argparse
-import typing
+from typing import List, Dict
 
 # 3rd-party
 from tqdm import tqdm
@@ -48,7 +48,7 @@ from PyPoE.poe.file.file_system import FileSystem
 # Globals
 # =============================================================================
 
-__all__: typing.List[str] = []
+__all__: List[str] = []
 
 # =============================================================================
 # Classes
@@ -107,7 +107,7 @@ class DatExportHandler:
 
         args.spec = spec
 
-    def _read_dat_files(self, args: argparse.Namespace, prefix: str = '') -> typing.Dict[str, dat.DatFile]:
+    def _read_dat_files(self, args: argparse.Namespace, prefix: str = '') -> Dict[str, dat.DatFile]:
         path = get_content_path()
 
         console(prefix + 'Loading file system...')

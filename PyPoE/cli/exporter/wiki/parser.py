@@ -55,7 +55,7 @@ Functions
 # Python
 import argparse
 import re
-import typing
+from typing import Any, Callable, Dict, List, Pattern, Union, Tuple
 import warnings
 import os
 from collections import OrderedDict
@@ -1400,8 +1400,8 @@ _inter_wiki_map = {
 _MAX_RE = 97
 
 
-def _make_inter_wiki_re() -> typing.Dict[str, typing.List[typing.Pattern]]:
-    out: dict[str, typing.List[typing.Pattern]] = {}
+def _make_inter_wiki_re() -> Dict[str, List[Pattern]]:
+    out: dict[str, List[Pattern]] = {}
     for language, _inter_wiki_mapping in _inter_wiki_map.items():
         out[language] = []
         for i in range(0, (len(_inter_wiki_mapping)//_MAX_RE)+1):
@@ -1446,10 +1446,10 @@ class BaseParser:
     }
     _MISSING_MSG = 'Several arguments have not been found:\n%s'
 
-    _TC_KWARGS: typing.Dict = {}
+    _TC_KWARGS: Dict = {}
 
-    _files: typing.List[str] = []
-    _translations: typing.List[str] = []
+    _files: List[str] = []
+    _translations: List[str] = []
 
     def __init__(self, base_path: str, parsed_args: argparse.Namespace) -> None:
         self.parsed_args = parsed_args
@@ -1494,12 +1494,12 @@ class BaseParser:
             self,
             dat_file_name: str,
             column_id: str,
-            arg_list: typing.List[str],
+            arg_list: List[str],
             error_msg=_MISSING_MSG
-    ) -> typing.List[DatRecord]:
+    ) -> List[DatRecord]:
         self.rr[dat_file_name].build_index(column_id)
 
-        rows: typing.List[DatRecord] = []
+        rows: List[DatRecord] = []
         missing = []
 
         if column_id in self.rr[dat_file_name].columns_unique:
@@ -1522,10 +1522,10 @@ class BaseParser:
 
         return rows
 
-    def _format_tr(self, tr: typing.Union[typing.List[int], typing.List[str], TranslationResult]) -> str:
+    def _format_tr(self, tr: Union[List[int], List[str], TranslationResult]) -> str:
         return make_inter_wiki_links(self._format_lines(tr.lines))
 
-    def _format_lines(self, lines: typing.List[str]) -> str:
+    def _format_lines(self, lines: List[str]) -> str:
         return '<br>'.join(lines).replace('\n', '<br>')
 
     def _format_wiki_title(self, title: str) -> str:
@@ -1563,8 +1563,8 @@ class BaseParser:
             if not os.path.exists(self._img_path):
                 os.makedirs(self._img_path)
 
-    def _get_stats(self, stats: typing.List[str] = None, values: typing.List[typing.Union[str, typing.Tuple]] = None, mod: DatRecord = None,
-                   translation_file: str = None) -> typing.List[str]:
+    def _get_stats(self, stats: List[str] = None, values: List[Union[str, Tuple]] = None, mod: DatRecord = None,
+                   translation_file: str = None) -> List[str]:
         if translation_file is None:
             if mod is None:
                 raise ValueError(
@@ -1732,16 +1732,16 @@ class TagHandler:
                 string = self._IL_FORMAT % string
         return string
 
-    def _basic_handler(self, hstr: str, parameter: typing.Any, tid: str) -> str:
+    def _basic_handler(self, hstr: str, parameter: Any, tid: str) -> str:
         return self._C_FORMAT % (tid, hstr)
 
-    def _default_handler(self, hstr: str, parameter: typing.Any, tid: str) -> str:
+    def _default_handler(self, hstr: str, parameter: Any, tid: str) -> str:
         return self._C_FORMAT % (tid, self._check_link(hstr))
 
-    def _link_handler(self, hstr: str, parameter: typing.Any, tid: str) -> str:
+    def _link_handler(self, hstr: str, parameter: Any, tid: str) -> str:
         return self._C_FORMAT % (tid, '[[%s]]' % hstr)
 
-    def _unique_handler(self, hstr: str, parameter: typing.Any) -> str:
+    def _unique_handler(self, hstr: str, parameter: Any) -> str:
         words = self.rr['Words.dat'].index['Text'][hstr]
         if words and words[0]['WordlistsKey'] == WORDLISTS.UNIQUE_ITEM:
             # Check whether unique item name clashes with base item name
@@ -1754,7 +1754,7 @@ class TagHandler:
             hstr = self._check_link(hstr)
         return self._C_FORMAT % ('unique', hstr)
 
-    def _currency_handler(self, hstr: str, parameter: typing.Any) -> str:
+    def _currency_handler(self, hstr: str, parameter: Any) -> str:
         if 'x ' in hstr:
             s = hstr.split('x ', maxsplit=1)
             return self._C_FORMAT % (
@@ -1800,14 +1800,14 @@ class WikiCondition:
     INDENT = 33
     ADD_INCLUDE = False
 
-    def __init__(self, data: dict, cmdargs: argparse.Namespace, handler: typing.Callable = None) -> None:
+    def __init__(self, data: dict, cmdargs: argparse.Namespace, handler: Callable = None) -> None:
         self.data = data
         self.cmdargs = cmdargs
         if handler is None:
             self.handler = self._handler
         self.template_arguments = None
 
-    def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Union[bool, str]:
+    def __call__(self, *args: Any, **kwargs: Any) -> Union[bool, str]:
         page = kwargs.get('page')
 
         if page is not None:
@@ -1943,7 +1943,7 @@ def make_inter_wiki_links(string: str) -> str:
     return string
 
 
-def find_template(wikitext: str, template_name: str) -> typing.Dict[str, typing.Any]:
+def find_template(wikitext: str, template_name: str) -> Dict[str, Any]:
     """
     Finds a template within wikitext and parses the arguments.
 
@@ -1989,7 +1989,7 @@ def find_template(wikitext: str, template_name: str) -> typing.Dict[str, typing.
     ], re.UNICODE | re.MULTILINE)
 
     # Returns
-    texts: typing.Any = [[], ]
+    texts: Any = [[], ]
     kw_arguments = OrderedDict()
     arguments = []
 

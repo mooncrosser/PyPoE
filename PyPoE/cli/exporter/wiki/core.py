@@ -33,7 +33,7 @@ See PyPoE/LICENSE
 
 # self
 import argparse
-import typing
+from typing import Any
 
 from PyPoE.cli.core import console, Msg
 from PyPoE.cli.handler import BaseHandler
@@ -73,7 +73,7 @@ class WikiHandler(BaseHandler):
         for handler in ADMIN_HANDLERS:
             handler(wiki_sub)
 
-    def _ver_dist_changed(self, key: str, value: typing.Any, old_value: typing.Any) -> None:
+    def _ver_dist_changed(self, key: str, value: Any, old_value: Any) -> None:
         if value == old_value:
             return
         config.set_setup_variable('temp_dir', 'performed', False)

@@ -40,7 +40,7 @@ Internal API
 import argparse
 import re
 import os.path
-import typing
+from typing import Any, List
 import warnings
 from functools import partialmethod
 from collections import OrderedDict
@@ -58,7 +58,7 @@ from PyPoE.poe.file.psg import PSGFile
 # Globals
 # =============================================================================
 
-__all__: typing.List[str] = []
+__all__: List[str] = []
 
 # =============================================================================
 # Classes
@@ -106,7 +106,7 @@ class PassiveSkillCommandHandler(ExporterHandler):
             dest='re_id',
         )'''
 
-    def add_default_parsers(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+    def add_default_parsers(self, *args: Any, **kwargs: Any) -> None:
         super().add_default_parsers(*args, **kwargs)
         self.add_format_argument(kwargs['parser'])
         self.add_image_arguments(kwargs['parser'])
@@ -195,7 +195,7 @@ class PassiveSkillParser(parser.BaseParser):
         }),
     ))
 
-    def _apply_filter(self, parsed_args: argparse.Namespace, passives: typing.List[DatRecord]) -> typing.List[DatRecord]:
+    def _apply_filter(self, parsed_args: argparse.Namespace, passives: List[DatRecord]) -> List[DatRecord]:
         if parsed_args.re_id:
             parsed_args.re_id = re.compile(parsed_args.re_id, flags=re.UNICODE)
         else:
@@ -228,7 +228,7 @@ class PassiveSkillParser(parser.BaseParser):
             column_id='Name', arg_list=parsed_args.name
         ))
 
-    def export(self, parsed_args: argparse.Namespace, passives: typing.List[DatRecord]) -> ExporterResult:
+    def export(self, parsed_args: argparse.Namespace, passives: List[DatRecord]) -> ExporterResult:
         r = ExporterResult()
 
         passives = self._apply_filter(parsed_args, passives)

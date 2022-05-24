@@ -34,7 +34,7 @@ import argparse
 import os
 
 # 3rd Party
-import typing
+from typing import Any, List
 
 from graphviz import Digraph
 
@@ -100,7 +100,7 @@ class WarbandsParser(BaseParser):
     ]
 
     # Load translations in advance
-    _translations: typing.List[str] = [
+    _translations: List[str] = [
     ]
 
     def warbands(self, parsed_args: argparse.Namespace) -> ExporterResult:
@@ -129,7 +129,7 @@ class WarbandsParser(BaseParser):
 
         return r
 
-    def graph(self, parsed_args: argparse.Namespace, **kwargs: typing.Any):
+    def graph(self, parsed_args: argparse.Namespace, **kwargs: Any):
         if parsed_args.type == 'map':
             dat_file = self.rr['WarbandsMapGraph.dat']
             out_file = 'warbands_map_graph.cv'
