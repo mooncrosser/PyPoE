@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class UnknownColumnNameGenerator:
 
     _flag_count = 0
@@ -6,7 +9,7 @@ class UnknownColumnNameGenerator:
     _data_count = 0
     _unknown_count = 0
 
-    def next_name(self, column) -> str:
+    def next_name(self, column: Any) -> str:
         if column.type == 'bool':
             name = f'Flag{self._flag_count}'
             self._flag_count += 1

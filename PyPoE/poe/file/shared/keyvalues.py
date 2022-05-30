@@ -86,7 +86,8 @@ import re
 import warnings
 import os
 from collections import defaultdict, OrderedDict
-from typing import Union
+from io import BytesIO
+from typing import Any, Dict, Union
 
 # 3rd-party
 
@@ -129,7 +130,7 @@ class AbstractKeyValueSection(dict):
     ORDERED_HASH_KEYS = set()
     NAME = ''
 
-    def __init__(self, parent, name=None, *args, **kwargs):
+    def __init__(self, parent: 'AbstractKeyValueFile', name=None, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.parent: 'AbstractKeyValueFile' = parent
         if name:
@@ -139,7 +140,7 @@ class AbstractKeyValueSection(dict):
         else:
             raise ParserError('Missing name for section')
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Any, value: Any):
         # Equals "override" behaviour
         if key in self.ORDERED_HASH_KEYS:
             if not isinstance(value, OrderedDict):
@@ -157,7 +158,7 @@ class AbstractKeyValueSection(dict):
                     value = [value, ]
         super().__setitem__(key, value)
 
-    def merge(self, other: 'AbstractKeyValueSection'):
+    def merge(self, other: 'AbstractKeyValueSection') -> None:
         if not isinstance(other, AbstractKeyValueSection):
             raise TypeError(
                 'Other must be a AbstractKeyValuesSection instance, got "%s" '
@@ -252,8 +253,8 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
                                               None] = None,
                  version: Union[int, None] = None,
                  extends: Union[str, None] = None,
-                 keys=None
-                 ):
+                 keys: Any = None
+                 ) -> None:
         AbstractFile.__init__(self)
         defaultdict.__init__(self, keys)
 
@@ -280,7 +281,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
     #
     # Special
     #
-    def __missing__(self, key) -> AbstractKeyValueSection:
+    def __missing__(self, key: Any) -> AbstractKeyValueSection:
         try:
             self[key] = self.SECTIONS[key](parent=self)
         except KeyError:
@@ -288,7 +289,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
 
         return self[key]
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: Any):
         raise NotImplementedError()
 
     def __repr__(self) -> str:
@@ -301,7 +302,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
                }
 
     @doc(doc=AbstractFile._read)
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: Union[BytesIO, bytes, str], *args: Any, **kwargs: Any) -> None:
         data = buffer.read().decode('utf-16')
 
         match = self._re_header.match(data)
@@ -372,7 +373,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
             self.extends = extend
 
     @doc(doc=AbstractFile._write)
-    def _write(self, buffer, *args, **kwargs):
+    def _write(self, buffer: Union[BytesIO, bytes, str], *args: Any, **kwargs: Any) -> None:
         lines = [
             'version %s' % self.version,
             'extends "%s"' % (self.extends if self.extends else 'nothing'),
@@ -393,7 +394,7 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
         buffer.write('\n'.join(lines).encode('utf-16le'))
 
     @doc(prepend=AbstractFile.write)
-    def write(self, *args, **kwargs):
+    def write(self, *args: Any, **kwargs: Any) -> Any:
         """
         Warning
         -------
@@ -402,10 +403,10 @@ class AbstractKeyValueFile(AbstractFile, defaultdict):
         """
         return super().write(*args, **kwargs)
 
-    def _get_write_line(self, key, value):
+    def _get_write_line(self, key: Any, value: Any) -> str:
         return '\t%s = "%s"' % (key, value)
 
-    def merge(self, other: 'AbstractKeyValueFile'):
+    def merge(self, other: 'AbstractKeyValueFile') -> None:
         """
         Merge with other file.
 
@@ -437,7 +438,7 @@ class AbstractKeyValueFileCache(AbstractFileCache):
     FILE_TYPE = AbstractKeyValueFile
 
     @doc(doc=AbstractFileCache._get_file_instance_args)
-    def _get_file_instance_args(self, file_name):
+    def _get_file_instance_args(self, file_name: str) -> Dict[str, Any]:
         options = super()._get_file_instance_args(file_name)
         options['parent_or_file_system'] = self.file_system
 

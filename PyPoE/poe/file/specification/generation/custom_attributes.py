@@ -1,7 +1,7 @@
 
 class CustomizedField:
     def __init__(self,
-                 enum: str = None):
+                 enum: str = None) -> None:
         self.enum = enum
 
 

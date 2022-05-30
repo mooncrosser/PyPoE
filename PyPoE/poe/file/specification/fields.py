@@ -192,7 +192,7 @@ Documentation
 
 # Python
 from collections import OrderedDict
-from typing import Tuple
+from typing import Any, Tuple
 
 # 3rd-party
 
@@ -227,7 +227,7 @@ class Specification(dict):
     """
     Specification file
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
     def validate(self):
@@ -392,7 +392,7 @@ class File:
     def __init__(self,
                  fields: Tuple['Field', ...] = None,
                  virtual_fields: Tuple['VirtualField', ...] = None
-                 ):
+                 ) -> None:
         """
         Parameters
         ----------
@@ -450,7 +450,7 @@ class File:
             for item in delete_zip:
                 del self.columns_zip[item]
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Any):
         return getattr(self, item)
 
     def as_dict(self) -> dict:

@@ -81,7 +81,7 @@ class AbstractFileCache(ReprMixin):
                  files: List[str] = None,
                  files_shortcut: bool = True,
                  instance_options: Dict[str, Any] = None,
-                 read_options: Dict[str, Any] = None):
+                 read_options: Dict[str, Any] = None) -> None:
         """
         Parameters
         ----------
@@ -147,8 +147,8 @@ class AbstractFileCache(ReprMixin):
 
     def _get_file_instance_args(self,
                                 file_name: str,
-                                *args,
-                                **kwargs) -> Dict[str, Any]:
+                                *args: Any,
+                                **kwargs: Any) -> Dict[str, Any]:
         """
         Returns a dictionary of keyword arguments to pass to the file's
         __init__ method upon initial reading.
@@ -169,8 +169,8 @@ class AbstractFileCache(ReprMixin):
 
     def _get_read_args(self,
                        file_name: str,
-                       *args,
-                       **kwargs) -> Dict[str, Any]:
+                       *args: Any,
+                       **kwargs: Any) -> Dict[str, Any]:
         """
         Returns a dictionary of keyword arguments to pass to the file's
         read method upon initial reading.
@@ -196,8 +196,8 @@ class AbstractFileCache(ReprMixin):
 
     def _create_instance(self,
                          file_name: str,
-                         *args,
-                         **kwargs) -> Any:
+                         *args: Any,
+                         **kwargs: Any) -> Any:
         """
         Creates a new instance for the given file name
 
@@ -220,8 +220,8 @@ class AbstractFileCache(ReprMixin):
 
     def get_file(self,
                  file_name: str,
-                 *args,
-                 **kwargs) -> AbstractFileReadOnly:
+                 *args: Any,
+                 **kwargs: Any) -> AbstractFileReadOnly:
         """
         Returns the the specified file from the cache.
 

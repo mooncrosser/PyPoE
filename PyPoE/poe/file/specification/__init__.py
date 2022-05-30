@@ -22,6 +22,7 @@ Overview
 # Python
 import importlib
 from importlib.machinery import SourceFileLoader
+from typing import Union
 
 # 3rd-party
 
@@ -39,7 +40,12 @@ __all__ = ['load']
 # =============================================================================
 
 
-def load(path=None, version=VERSION.DEFAULT, reload=False, validate=None):
+def load(
+        path: str = None,
+        version: VERSION = VERSION.DEFAULT,
+        reload: bool = False,
+        validate: Union[bool, None] = None
+):
     """
     Loads a specification from a python module that can be used for the dat
     files.

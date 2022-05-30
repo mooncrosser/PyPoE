@@ -8,6 +8,7 @@ import os
 import sys
 import urllib.request
 from types import SimpleNamespace
+from typing import Any
 
 from PyPoE import DIR
 from PyPoE.poe.file.specification.fields import VirtualField
@@ -38,7 +39,7 @@ def _read_dat_schema_local() -> str:
         return f.read()
 
 
-def _load_dat_schema_tables(schema_json: str):
+def _load_dat_schema_tables(schema_json: str) -> Any:
     data = json.loads(schema_json, object_hook=lambda d: SimpleNamespace(**d))
     return sorted(data.tables, key=lambda table: table.name)
 
@@ -56,7 +57,7 @@ def _convert_tables(tables: list) -> str:
     return spec
 
 
-def _convert_table(table) -> str:
+def _convert_table(table: Any) -> str:
     table_name = f'{table.name}.dat'
     spec = f"    '{table_name}': File(\n"
 
@@ -78,7 +79,7 @@ def _convert_columns(table_name: str, columns: list) -> str:
     return spec
 
 
-def _convert_column(table_name: str, column, name_generator: UnknownColumnNameGenerator) -> str:
+def _convert_column(table_name: str, column: Any, name_generator: UnknownColumnNameGenerator) -> str:
     column_name = column.name if column.name else name_generator.next_name(column)
     column_type = _convert_column_type(column)
     if table_name in custom_attributes and column_name in custom_attributes[table_name]:
@@ -110,7 +111,7 @@ def _convert_column(table_name: str, column, name_generator: UnknownColumnNameGe
     return spec
 
 
-def _convert_column_type(column) -> str:
+def _convert_column_type(column: Any) -> str:
     if column.type == 'array':
         return 'ref|list|byte'
     elif column.array:

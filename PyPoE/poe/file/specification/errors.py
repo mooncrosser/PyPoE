@@ -38,6 +38,7 @@ Documentation
 
 # Python
 from enum import IntEnum
+from typing import Any
 
 # 3rd-party
 
@@ -112,7 +113,7 @@ class SpecificationError(ValueError):
         RUNTIME_MISSING_FOREIGN_KEY = 3001
         RUNTIME_ROWSIZE_MISMATCH = 3002
 
-    def __init__(self, code, msg):
+    def __init__(self, code: Any, msg: str):
         super().__init__()
         self.code = self.ERRORS(code)
         self.msg = msg

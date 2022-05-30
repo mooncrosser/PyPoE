@@ -126,7 +126,7 @@ class AbstractFileReadOnly(ReprMixin):
     It provides common methods as well as methods that implementing classes
     should override.
     """
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: Union[BytesIO, bytes, str], *args: Any, **kwargs: Any):
         """
         Parameters
         ----------
@@ -178,8 +178,8 @@ class AbstractFileReadOnly(ReprMixin):
 
     def read(self,
              file_path_or_raw: Union[BytesIO, bytes, str],
-             *args,
-             **kwargs) -> Any:
+             *args: Any,
+             **kwargs: Any) -> Any:
         """
         Reads the file contents into the specified path or buffer. This will
         also reset any existing contents of the file.
@@ -222,7 +222,7 @@ class AbstractFile(AbstractFileReadOnly):
     should override.
     """
 
-    def _write(self, buffer, *args, **kwargs):
+    def _write(self, buffer:  Union[BytesIO, bytes, str], *args: Any, **kwargs: Any):
         """
         Parameters
         ----------
@@ -234,7 +234,7 @@ class AbstractFile(AbstractFileReadOnly):
     def get_write_buffer(self,
                          file_path_or_raw: Union[BytesIO, bytes, str],
                          function: Callable,
-                         *args, **kwargs) -> Any:
+                         *args: Any, **kwargs: Any) -> Any:
         """
         Will attempt to open the given file_path_or_raw in write mode and pass
         the buffer to the specified function.
@@ -273,8 +273,8 @@ class AbstractFile(AbstractFileReadOnly):
 
     def write(self,
               file_path_or_raw: Union[BytesIO, bytes, str],
-              *args,
-              **kwargs) -> Any:
+              *args: Any,
+              **kwargs: Any) -> Any:
         """
         Write the contents of file to the specified path or buffer.
 
@@ -321,7 +321,7 @@ class AbstractFileSystemNode(ReprMixin):
     def __init__(self,
                 parent: 'FileSystemNode',
                 file_system_type: FILE_SYSTEM_TYPES,
-                is_file: bool):
+                is_file: bool) -> None:
         self.parent: 'FileSystemNode' = parent
         self.file_system_type: FILE_SYSTEM_TYPES = file_system_type
         self.is_file: bool = is_file
