@@ -47,7 +47,9 @@ See PyPoE/LICENSE
 
 # Python
 import sys
-from typing import Any, Callable, Iterable, Union
+from collections.abc import Iterable
+import typing
+from typing import Any, Callable, Union
 
 # 3rd party
 import configobj
@@ -259,7 +261,7 @@ class ConfigHelper(ConfigObj):
 
         self.option[key] = value
 
-    def register_setup(self, key: str, funcs: Union[Callable, Iterable[Callable]]) -> None:
+    def register_setup(self, key: str, funcs: Union[Callable, typing.Iterable[Callable]]) -> None:
         """
         Registers one or multiple functions that will be called to perform
         the setup for the specified config key.
