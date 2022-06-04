@@ -76,7 +76,7 @@ import io
 import struct
 import os
 import warnings
-from typing import Union, Dict
+from typing import Any, Union, Dict, List
 
 # 3rd Party
 
@@ -131,12 +131,12 @@ class BaseRecord(ReprMixin):
 
     __slots__ = ['_container', 'length', 'offset']
 
-    def __init__(self, container, length, offset):
+    def __init__(self, container: 'GGPKFile', length: int, offset: int) -> None:
         self._container = container
         self.length = length
         self.offset = offset
 
-    def read(self, ggpkfile):
+    def read(self, ggpkfile: 'GGPKFile') -> None:
         """
         Read this record's header for the given GGPKFile instance.
 
@@ -147,7 +147,7 @@ class BaseRecord(ReprMixin):
         """
         pass
 
-    def write(self, ggpkfile):
+    def write(self, ggpkfile: 'GGPKFile') -> None:
         """
         Write this record's header for the given GGPKFile instance.
 
@@ -161,13 +161,13 @@ class BaseRecord(ReprMixin):
 
 
 class MixinRecord:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._name = ''
         self._name_length = 0
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Returns and sets the name of the file
 
@@ -182,7 +182,7 @@ class MixinRecord:
         return self._name
 
     @name.setter
-    def name(self, name):
+    def name(self, name: str):
         self._name = name
         # Account for null bytes
         self._name_length = len(name) + 1
@@ -204,7 +204,7 @@ class GGPKRecord(BaseRecord):
     __slots__ = BaseRecord.__slots__.copy() + ['offsets']
 
     @doc(doc=BaseRecord.read)
-    def read(self, ggpkfile):
+    def read(self, ggpkfile: 'GGPKFile'):
         # Should be 2, TODO?
         records = struct.unpack('<i', ggpkfile.read(4))[0]
         self.offsets = []
@@ -212,7 +212,7 @@ class GGPKRecord(BaseRecord):
             self.offsets.append(struct.unpack('<q', ggpkfile.read(8))[0])
 
     @doc(doc=BaseRecord.write)
-    def write(self, ggpkfile):
+    def write(self, ggpkfile: 'GGPKFile'):
         # Write length & tag
         super().write(ggpkfile)
         # Should always be 2
@@ -230,7 +230,7 @@ class DirectoryRecordEntry(ReprMixin):
     offset :  int
         offset in :class:`GGPKFile`
     """
-    def __init__(self, hash, offset):
+    def __init__(self, hash: int, offset: int) -> None:
         """
         Parameters
         ----------
@@ -264,11 +264,11 @@ class DirectoryRecord(MixinRecord, BaseRecord):
 
     __slots__ = BaseRecord.__slots__.copy() + ['_name', '_name_length', 'entries_length', 'hash', 'entries']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
     @doc(doc=BaseRecord.read)
-    def read(self, ggpkfile):
+    def read(self, ggpkfile: 'GGPKFile') -> None:
         self._name_length = struct.unpack('<i', ggpkfile.read(4))[0]
         self.entries_length = struct.unpack('<i', ggpkfile.read(4))[0]  
         self.hash = int.from_bytes(ggpkfile.read(32), 'big')
@@ -284,7 +284,7 @@ class DirectoryRecord(MixinRecord, BaseRecord):
             ))
 
     @doc(doc=BaseRecord.write)
-    def write(self, ggpkfile):
+    def write(self, ggpkfile: 'GGPKFile') -> None:
         # Error Checking & variable preparation
         if len(self.hash) != 32:
             raise ValueError('Hash must be 32 bytes, was %s bytes' % len(self.hash))
@@ -328,10 +328,10 @@ class FileRecord(MixinRecord, BaseRecord):
 
     __slots__ = BaseRecord.__slots__.copy() + ['_name', '_name_length', 'hash', 'data_start', 'data_length']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         
-    def extract(self, buffer=None):
+    def extract(self, buffer: io.BytesIO = None) -> io.BytesIO:
         """
         Extracts this file contents into a memory file object.
 
@@ -361,7 +361,7 @@ class FileRecord(MixinRecord, BaseRecord):
         memfile.seek(0)
         return memfile
 
-    def extract_to(self, directory, name=None):
+    def extract_to(self, directory: str, name: str = None) -> None:
         """
         Extracts the file to the given directory.
         
@@ -379,7 +379,7 @@ class FileRecord(MixinRecord, BaseRecord):
             exfile.write(self.extract().read())
 
     @doc(doc=BaseRecord.read)
-    def read(self, ggpkfile):
+    def read(self, ggpkfile: io.BytesIO):
         self._name_length = struct.unpack('<i', ggpkfile.read(4))[0]
         self.hash = int.from_bytes(ggpkfile.read(32), 'big')
         # UTF-16 2-byte width
@@ -423,12 +423,12 @@ class FreeRecord(BaseRecord):
     __slots__ = BaseRecord.__slots__.copy() + ['next_free']
 
     @doc(doc=BaseRecord.read)
-    def read(self, ggpkfile):
+    def read(self, ggpkfile: 'GGPKFile') -> None:
         self.next_free = struct.unpack('<q', ggpkfile.read(8))[0]
         ggpkfile.seek(self.length -16, os.SEEK_CUR)
 
     @doc(doc=BaseRecord.write)
-    def write(self, ggpkfile):
+    def write(self, ggpkfile: 'GGPKFile') -> None:
         # Write length & tag
         super().write(ggpkfile)
         ggpkfile.write(struct.pack('<q', self.next_free))
@@ -454,12 +454,12 @@ class DirectoryNode(AbstractFileSystemNode):
     _REPR_ARGUMENTS_IGNORE = {'parent'}
 
     def __init__(self,
-                 *args,
+                 *args: Any,
                  parent: 'DirectoryNode',
                  is_file: bool,
                  record: Union[DirectoryRecord, FileRecord],
                  hash: str,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         super().__init__(
             *args,
             parent=parent,
@@ -495,7 +495,7 @@ class GGPKFile(AbstractFileReadOnly, metaclass=InheritedDocStringsMeta):
 
     EXTENSION = '.ggpk'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         AbstractFileReadOnly.__init__(self, *args, **kwargs)
         self.directory: Union[DirectoryNode, None] = None
         self.records: Dict[int, BaseRecord] = {}
@@ -547,7 +547,7 @@ class GGPKFile(AbstractFileReadOnly, metaclass=InheritedDocStringsMeta):
     # Private
     #
 
-    def _read_record(self, records, ggpkfile, offset: int):
+    def _read_record(self, records: Dict, ggpkfile: io.BytesIO, offset: int):
         length = struct.unpack('<i', ggpkfile.read(4))[0]
         tag = ggpkfile.read(4)
         
@@ -571,7 +571,7 @@ class GGPKFile(AbstractFileReadOnly, metaclass=InheritedDocStringsMeta):
         record.read(ggpkfile)
         records[offset] = record
 
-    def diff(self, other_ggpk, out_file=None):
+    def diff(self, other_ggpk: 'GGPKFile', out_file: str = None) -> List[str]:
         """
         Creates a list of file paths that differ between this GGPKFile instance
         and another GGPKFile instance.
@@ -736,7 +736,7 @@ class GGPKFile(AbstractFileReadOnly, metaclass=InheritedDocStringsMeta):
 
     directory_build = build_directory
         
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: io.BytesIO, *args: Any, **kwargs: Any) -> None:
         """
         Reads the records from the file into object.records.
         """
@@ -785,7 +785,7 @@ class GGPKFile(AbstractFileReadOnly, metaclass=InheritedDocStringsMeta):
         self.records = records
 
     @doc(prepend=AbstractFileReadOnly.read)
-    def read(self, file_path_or_raw, *args, **kwargs):
+    def read(self, file_path_or_raw: Union[str, io.BytesIO], *args: Any, **kwargs: Any) -> None:
         super().read(file_path_or_raw, *args, **kwargs)
         self._file_path_or_raw = file_path_or_raw
 

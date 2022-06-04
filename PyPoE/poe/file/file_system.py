@@ -39,7 +39,7 @@ Classes
 
 # Python
 import os
-from typing import Union
+from typing import Any, Union
 
 # 3rd-party
 import brotli
@@ -67,13 +67,13 @@ class FileSystemNode(AbstractFileSystemNode):
     __slots__ = ['file_system'] + AbstractFileSystemNode.__slots__
 
     def __init__(self,
-                 *args,
+                 *args: Any,
                  parent: 'FileSystemNode',
                  file_system_type: FILE_SYSTEM_TYPES,
                  is_file: bool,
                  file_system: 'FileSystem',
                  name: str,
-                 **kwargs):
+                 **kwargs: Any):
 
         super().__init__(
             *args,
@@ -108,7 +108,7 @@ class FileSystem:
     Further decompression of bundles or reading of data will be only be done
     when the get_file method is called.
     """
-    def __init__(self, root_path: str):
+    def __init__(self, root_path: str) -> None:
         """
         Parameters
         ----------

@@ -48,15 +48,17 @@ API for internal use, but still may be useful to work with more directly.
 # =============================================================================
 
 # Python
+import io
 import struct
 from collections import OrderedDict
+from typing import Any, Tuple, Union, List
 
 # 3rd-party
 
 # self
 from PyPoE.shared.mixins import ReprMixin
 from PyPoE.poe.file.shared import AbstractFileReadOnly
-from PyPoE.poe.file.dat import DatFile, RelationalReader
+from PyPoE.poe.file.dat import DatFile, DatReader, DatRecord, RelationalReader
 
 # =============================================================================
 # Globals
@@ -101,7 +103,7 @@ class GraphGroup(ReprMixin):
         ('nodes', None),
     ))
 
-    def __init__(self, x, y, id, flag):
+    def __init__(self, x: float, y: float, id: int, flag: bool) -> None:
         """
         Parameters
         ----------
@@ -123,7 +125,7 @@ class GraphGroup(ReprMixin):
         self.flag = flag
 
     @property
-    def point(self):
+    def point(self) -> Tuple[float, float]:
         """
         Returns a tuple containing the x and y coordinate.
 
@@ -134,7 +136,7 @@ class GraphGroup(ReprMixin):
         """
         return self.x, self.y
 
-    def _update_connections(self, dat_reader):
+    def _update_connections(self, dat_reader: DatReader) -> None:
         """
         Updates the stored connections using the given dat_reader instance.
 
@@ -182,7 +184,14 @@ class GraphGroupNode(ReprMixin):
 
     __slots__ = ['parent', 'passive_skill', 'radius', 'position', 'connections']
 
-    def __init__(self, parent, passive_skill, radius, position, connections):
+    def __init__(
+            self,
+            parent: GraphGroup,
+            passive_skill: Union[int, DatRecord],
+            radius: int,
+            position: int,
+            connections: List[Union[int, DatRecord]]
+    ):
         """
         Parameters
         ----------
@@ -238,7 +247,7 @@ class PSGFile(AbstractFileReadOnly):
 
     EXTENSION = '.psg'
 
-    def __init__(self, passive_skills_dat_file=None, *args, **kwargs):
+    def __init__(self, passive_skills_dat_file: DatReader = None, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         self.root_passives = []
@@ -262,7 +271,7 @@ class PSGFile(AbstractFileReadOnly):
         if self._passive_skills:
             self._passive_skills.build_index('PassiveSkillGraphId')
 
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: io.BytesIO, *args: Any, **kwargs: Any):
         data = buffer.read()
         offset = 0
 
@@ -338,11 +347,11 @@ class PSGFile(AbstractFileReadOnly):
                 group._update_connections(self._passive_skills)
 
     @property
-    def is_read(self):
+    def is_read(self) -> bool:
         return bool(self.groups)
 
     @property
-    def passive_skills_dat_file(self):
+    def passive_skills_dat_file(self) -> DatReader:
         return self._passive_skills
 
 

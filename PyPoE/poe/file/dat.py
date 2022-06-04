@@ -71,10 +71,12 @@ Internal API
 # Python
 import struct
 import warnings
+import typing
 from enum import IntEnum
 from io import BytesIO
 from collections import OrderedDict, defaultdict
 from collections.abc import Iterable
+from typing import Any, Iterator, Union, Tuple, List
 
 # 3rd-party
 
@@ -85,6 +87,7 @@ from PyPoE.poe import constants
 from PyPoE.poe.file.shared import AbstractFileReadOnly
 from PyPoE.poe.file.shared.cache import AbstractFileCache
 from PyPoE.poe.file.specification import load
+from PyPoE.poe.file.specification.fields import Specification
 from PyPoE.poe.file.specification.errors import SpecificationError, \
     SpecificationWarning
 
@@ -96,8 +99,8 @@ _default_spec = None
 
 __all__ = [
     'DAT_FILE_MAGIC_NUMBER',
-    'DatFile', 'RelationalReader',
-    'set_default_spec',
+    'DatFile', 'DatReader', 'DatRecord',
+    'RelationalReader', 'set_default_spec'
 ]
 
 DAT_FILE_MAGIC_NUMBER = b'\xBB\xbb\xBB\xbb\xBB\xbb\xBB\xbb'
@@ -148,8 +151,8 @@ class DatValue:
         'child',
     ]
 
-    def __init__(self, value=None, offset=None, size=None, parent=None,
-                 specification=None):
+    def __init__(self, value: Any = None, offset: int = None, size: int = None, parent: 'DatReader' = None,
+                 specification: Specification = None) -> None:
         self.value = value
         self.size = size
         self.offset = offset
@@ -158,7 +161,7 @@ class DatValue:
         self.children = None
         self.child = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # TODO: iterative vs recursive?
         if self.is_pointer:
             return repr(self.child)
@@ -167,44 +170,44 @@ class DatValue:
         else:
             return 'DatValue(' + repr(self.value) +')'
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         if not isinstance(other, DatValue):
             return self.get_value() < other
 
         return self.get_value() < other.get_value()
 
-    def __le__(self, other):
+    def __le__(self, other) -> bool:
         if not isinstance(other, DatValue):
             return self.get_value() <= other
 
         return self.get_value() <= other.get_value()
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, DatValue):
             return self.get_value() == other
 
         return self.get_value() == other.get_value()
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         if not isinstance(other, DatValue):
             return self.get_value() != other
 
         return self.get_value() != other.get_value()
 
-    def __gt__(self, other):
+    def __gt__(self, other) -> bool:
         if not isinstance(other, DatValue):
             return self.get_value() > other
 
         return self.get_value() > other.get_value()
 
-    def __ge__(self, other):
+    def __ge__(self, other) -> bool:
         if not isinstance(other, DatValue):
             return self.get_value() >= other
 
         return self.get_value() >= other.get_value()
     # Properties
 
-    def _get_data_size(self):
+    def _get_data_size(self) -> int:
         """
         Retrieves size of the data held by the current instance in the data
         section.
@@ -231,7 +234,7 @@ class DatValue:
             raise TypeError('Only supported on DatValue instances with data (lists, pointers)')
         return size
 
-    def _get_data_start_offset(self):
+    def _get_data_start_offset(self) -> int:
         """
         Retrieves the start offset of the data held by the current instance in
         the data section.
@@ -254,7 +257,7 @@ class DatValue:
         else:
             raise TypeError('Only supported on DatValue instances with data (lists, pointers)')
 
-    def _get_data_end_offset(self):
+    def _get_data_end_offset(self) -> int:
         """
         Retrieves the end offset of the data held by the current instance in the
         data section.
@@ -272,7 +275,7 @@ class DatValue:
         """
         return self._get_data_start_offset() + self._get_data_size()
 
-    def _is_data(self):
+    def _is_data(self) -> bool:
         """
         Whether this DatValue instance is data or not.
 
@@ -282,7 +285,7 @@ class DatValue:
         """
         return self.parent is not None
 
-    def _has_data(self):
+    def _has_data(self) -> bool:
         """
         Whether this DatValue instance has data or not; this applies to types
         that hold a pointer.
@@ -293,7 +296,7 @@ class DatValue:
         """
         return self.is_list or self.is_pointer
 
-    def _is_list(self):
+    def _is_list(self) -> bool:
         """
         Whether this DatValue instance is a list.
 
@@ -303,7 +306,7 @@ class DatValue:
         """
         return self.children is not None
 
-    def _is_pointer(self):
+    def _is_pointer(self) -> bool:
         """
         Whether this DatValue instance is a pointer.
 
@@ -313,7 +316,7 @@ class DatValue:
         """
         return self.child is not None
 
-    def _is_parsed(self):
+    def _is_parsed(self) -> bool:
         """
         Whether this DatValue instance is parsed (i.e. non bytes).
 
@@ -334,7 +337,7 @@ class DatValue:
 
     # Public
 
-    def get_value(self):
+    def get_value(self) -> Any:
         """
         Returns the value that is held by the DatValue instance. This is done
         recursively, i.e. pointers will be dereferenced accordingly.
@@ -377,7 +380,7 @@ class DatRecord(list):
 
     __slots__ = ['parent', 'rowid']
 
-    def __init__(self, parent, rowid):
+    def __init__(self, parent: 'DatReader', rowid: int) -> None:
         """
         Parameters
         ----------
@@ -390,7 +393,7 @@ class DatRecord(list):
         self.parent = parent
         self.rowid = rowid
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Any):
         if isinstance(item, str):
             if item in self.parent.table_columns:
                 value = list.__getitem__(self, self.parent.table_columns[item]['index'])
@@ -407,7 +410,7 @@ class DatRecord(list):
                 raise KeyError(item)
         return list.__getitem__(self, item)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         stuff = ["{%s: %s}" % (k, self[i]) for i, k in enumerate(self.parent.table_columns)]
         return '[%s]' % ', '.join(stuff)
     '''def find_all(self, key, value):
@@ -418,7 +421,7 @@ class DatRecord(list):
                 values.append(value)
         return values'''
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.parent.file_name, self.rowid))
 
     def iter(self):
@@ -437,7 +440,7 @@ class DatRecord(list):
         for index, key in enumerate(self.parent.table_columns):
             yield key, self[key], index
 
-    def keys(self):
+    def keys(self) -> 'collections._OrderedDictKeysView':
         """
 
         Returns
@@ -510,8 +513,8 @@ class DatReader(ReprMixin):
         POINTER = 4
         POINTER_SELF = 5
 
-    def __init__(self, file_name, *args, use_dat_value=True, specification=None,
-                 auto_build_index=False, x64=False):
+    def __init__(self, file_name: str, *args: Any, use_dat_value=True, specification=None,
+                 auto_build_index=False, x64=False) -> None:
         """
         Parameters
         ----------
@@ -591,13 +594,13 @@ class DatReader(ReprMixin):
                     'columns_unique'):
             setattr(self, var, getattr(specification, var))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         return iter(self.table_data)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Any:
         return self.table_data[item]
 
-    def build_index(self, column=None):
+    def build_index(self, column: Union[str, typing.Iterable, None] = None) -> None:
         """
         Builds or rebuilds the index for the specified column.
 
@@ -654,7 +657,7 @@ class DatReader(ReprMixin):
                 for value in row[column]:
                     self.index[column][value].append(row)
 
-    def row_iter(self):
+    def row_iter(self) -> Iterator:
         """
         Returns
         -------
@@ -663,7 +666,7 @@ class DatReader(ReprMixin):
         """
         return iter(self.table_data)
 
-    def column_iter(self):
+    def column_iter(self) -> None:
         """
         Iterators over the columns
 
@@ -675,7 +678,7 @@ class DatReader(ReprMixin):
         for ci, column in enumerate(self.table_columns):
             yield [item[ci] for item in self]
 
-    def _get_cast_type(self, caststr):
+    def _get_cast_type(self, caststr: str) -> Tuple[str, Tuple[CastTypes, int, str]]:
         size = None
         cast = None
         remainder = ''
@@ -708,7 +711,15 @@ class DatReader(ReprMixin):
                 remainder = caststr[4:]
         return remainder, (cast_type, size, cast)
 
-    def _cast_from_spec(self, specification, casts, parent=None, offset=None, data=None, queue_data=None):
+    def _cast_from_spec(
+            self,
+            specification: Specification,
+            casts: List[List],
+            parent: 'DatReader' = None,
+            offset: int = None,
+            data: list = None,
+            queue_data: Any = None
+    ) -> Any:
         if casts[0][0] in (self.CastTypes.VALUE, self.CastTypes.POINTER_SELF):
             ivalue = data[0] if data else struct.unpack('<' + casts[0][2], self._file_raw[offset:offset+casts[0][1]])[0]
 
@@ -770,7 +781,7 @@ class DatReader(ReprMixin):
 
         return value
 
-    def _process_row(self, rowid):
+    def _process_row(self, rowid: int) -> DatRecord:
         offset = 4 + rowid * self.table_record_length
         row_data = DatRecord(self, rowid)
         data_raw = self._file_raw[offset:offset+self.table_record_length]
@@ -795,7 +806,7 @@ class DatReader(ReprMixin):
 
         return row_data
 
-    def read(self, raw):
+    def read(self, raw: Union[bytes, BytesIO]) -> List[DatRecord]:
         # TODO consider memory issues for saving raw contents
         if isinstance(raw, bytes):
             self._file_raw = raw
@@ -853,7 +864,7 @@ class DatReader(ReprMixin):
 
         return self.table_data
 
-    def print_data(self):
+    def print_data(self) -> None:
         """
         For debugging. Prints out data.
         """
@@ -864,7 +875,7 @@ class DatReader(ReprMixin):
                 print('|- %s: %s' % (k, v))
 
     @deprecated
-    def export_to_html(self, export_table=True, export_data=False):
+    def export_to_html(self, export_table=True, export_data=False) -> str:
         outstr = []
         if export_table:
             outstr.append('<table>')
@@ -928,7 +939,7 @@ class DatFile(AbstractFileReadOnly):
         reference to the DatReader instance once :meth:`read` has been called
     """
 
-    def __init__(self, file_name):
+    def __init__(self, file_name: str) -> None:
         """
         Parameters
         ----------
@@ -938,10 +949,10 @@ class DatFile(AbstractFileReadOnly):
         self._file_name = file_name
         self.reader = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DatFile<%s>(file_name="%s")' % (hex(id(self)), self._file_name)
 
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: BytesIO, *args: Any, **kwargs: Any) -> DatReader:
         self.reader = DatReader(self._file_name, **kwargs)
         self.reader.read(buffer.read())
 
@@ -981,8 +992,8 @@ class RelationalReader(AbstractFileCache):
     language : str
         language subdirectory in data directory
     """)
-    def __init__(self, raise_error_on_missing_relation=False,
-                 language=None, *args, **kwargs):
+    def __init__(self, raise_error_on_missing_relation: bool = False,
+                 language: str = None, *args: Any, **kwargs: Any) -> None:
         self.raise_error_on_missing_relation = raise_error_on_missing_relation
         if language == 'English' or language is None:
             self._language = ''
@@ -990,7 +1001,7 @@ class RelationalReader(AbstractFileCache):
             self._language = language + '/'
         super().__init__(*args, **kwargs)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
         """
         Shortcut that prepends Data/{language} if missing and transforms plain
         Data/ prefixes into language-specific prefixes.
@@ -1006,7 +1017,7 @@ class RelationalReader(AbstractFileCache):
 
         return self.get_file(item).reader
 
-    def _set_value(self, obj, other, key, offset):
+    def _set_value(self, obj: Any, other: Any, key: str, offset: int) -> Any:
         if obj is None:
             obj = None
         elif key:
@@ -1040,7 +1051,7 @@ class RelationalReader(AbstractFileCache):
                     obj = None
         return obj
 
-    def _dv_set_value(self, value, other, key, offset):
+    def _dv_set_value(self, value: Any, other: Any, key: str, offset: int) -> Any:
         if value.is_pointer:
             self._dv_set_value(value.child, other, key, offset)
         elif value.is_list:
@@ -1050,18 +1061,18 @@ class RelationalReader(AbstractFileCache):
 
         return value
 
-    def _simple_set_value(self, value, other, key, offset):
+    def _simple_set_value(self, value: Any, other: Any, key: str, offset: int) -> Any:
         if isinstance(value, list):
             return [self._set_value(item, other, key, offset) for item in value]
         else:
             return self._set_value(value, other, key, offset)
 
-    def _get_file_instance_args(self, file_name, *args, **kwargs):
+    def _get_file_instance_args(self, file_name: str, *args: None, **kwargs: None):
         opts = super()._get_file_instance_args(file_name)
         opts['file_name'] = file_name.replace('Data/' + self._language, '')
         return opts
 
-    def get_file(self, file_name):
+    def get_file(self, file_name: str) -> DatFile:
         """
         Attempts to return a dat file from the cache and if it isn't available,
         reads it in.
@@ -1148,7 +1159,7 @@ class RelationalReader(AbstractFileCache):
 # =============================================================================
 
 
-def set_default_spec(version=constants.VERSION.DEFAULT, reload=False):
+def set_default_spec(version: int = constants.VERSION.DEFAULT, reload: bool = False) -> None:
     """
     Sets the default specification to use for the dat reader.
 

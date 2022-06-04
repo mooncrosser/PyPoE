@@ -63,7 +63,7 @@ import os
 from enum import IntEnum
 from io import BytesIO
 from tempfile import TemporaryDirectory
-from typing import List, Union, Dict, Tuple
+from typing import Any, List, Union, Dict, Tuple
 
 # 3rd party
 from fnvhash import fnv1a_64
@@ -145,7 +145,7 @@ class ENCODE_TYPES(IntEnum):
 
 
 class Bundle(AbstractFileReadOnly):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, *kwargs)
         self.encoder: Union[ENCODE_TYPES, None] = None
         self.unknown: Union[int, None] = None
@@ -292,7 +292,7 @@ class BundleRecord(IndexRecord):
 
     _REPR_EXTRA_ATTRIBUTES = {x: None for x in __slots__}
 
-    def __init__(self, raw: bytes, parent: 'Index', offset: int):
+    def __init__(self, raw: bytes, parent: 'Index', offset: int) -> None:
         self.parent: Index = parent
 
         name_length = struct.unpack_from('<I', raw, offset=offset)[0]
@@ -325,7 +325,7 @@ class BundleRecord(IndexRecord):
         """
         return 'Bundles2/' + self.file_name
 
-    def read(self, file_path_or_raw: Union[str, bytes]):
+    def read(self, file_path_or_raw: Union[str, bytes]) -> None:
         """
         Reads the contents of this bundle if they haven't been read already
 
@@ -438,7 +438,7 @@ class DirectoryRecord(IndexRecord):
 class Index(Bundle):
     PATH = 'Bundles2/_.index.bin'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.bundles: Dict[int, BundleRecord] = {}
         self.files: Dict[int, FileRecord] = {}
@@ -525,7 +525,7 @@ class Index(Bundle):
 
         return fnv1a_64(path)
 
-    def _read(self, buffer: BytesIO):
+    def _read(self, buffer: BytesIO) -> None:
         if self.bundles:
             raise ValueError('Index bundle has been read already.')
         super()._read(buffer)

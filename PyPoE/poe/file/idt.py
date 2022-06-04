@@ -51,7 +51,9 @@ Internal API
 
 # Python
 import codecs
+import io
 import re
+from typing import Any, Dict
 
 # self
 from PyPoE.shared.containers import Record, TypedList, TypedContainerMeta
@@ -81,7 +83,7 @@ class CoordinateRecord(Record):
     """
     __slots__ = ['x', 'y']
 
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int) -> None:
         """
         Parameters
         ----------
@@ -116,7 +118,7 @@ class TextureRecord(Record):
 
     __slots__ = ['name', 'records']
 
-    def __init__(self, name, records=None):
+    def __init__(self, name: str, records: CoordinateList[CoordinateRecord] = None) -> None:
         """
         Parameters
         ----------
@@ -187,7 +189,7 @@ class IDTFile(AbstractFile):
 
     EXTENSION = '.idt'
 
-    def __init__(self, data=None):
+    def __init__(self, data: Dict = None) -> None:
         """
         Creates a new IDTFile instance.
 
@@ -230,7 +232,7 @@ class IDTFile(AbstractFile):
 
     # Properties
 
-    def _get_records(self):
+    def _get_records(self) -> TextureList[TextureRecord]:
         """
         Get records
 
@@ -241,7 +243,7 @@ class IDTFile(AbstractFile):
         """
         return self._records
 
-    def _set_records(self, value):
+    def _set_records(self, value: TextureList[TextureRecord]):
         """
         Set records
 
@@ -265,7 +267,7 @@ class IDTFile(AbstractFile):
 
     records = property(fget=_get_records, fset=_set_records)
 
-    def _get_image(self):
+    def _get_image(self) -> str:
         """
         Get image path
 
@@ -276,7 +278,7 @@ class IDTFile(AbstractFile):
         """
         return self._image
 
-    def _set_image(self, value):
+    def _set_image(self, value: str):
         """
         Set image path
 
@@ -291,7 +293,7 @@ class IDTFile(AbstractFile):
 
     # Private
 
-    def _write(self, buffer):
+    def _write(self, buffer: io.BytesIO):
         out = []
 
         out.append('version %s\n' % self.version)
@@ -307,7 +309,7 @@ class IDTFile(AbstractFile):
 
         buffer.write(codecs.BOM_UTF16_LE + ''.join(out).encode('utf-16_le'))
 
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: io.BytesIO, *args: Any, **kwargs: Any) -> None:
         # Should detect little endian byte order accordingly and remove the BOM
         data = buffer.read().decode('utf-16')
         match = self._regex_parse.match(data)

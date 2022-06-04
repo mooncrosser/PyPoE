@@ -118,13 +118,14 @@ from string import ascii_letters
 from collections.abc import Iterable
 from collections import OrderedDict, defaultdict
 from typing import Union, Tuple, List, Iterable as t_Iterable, Dict, Any, \
-    Callable
+    Callable, Set
 
 # self
 from PyPoE import DATA_DIR
 from PyPoE.shared.decorators import doc
 from PyPoE.shared.mixins import ReprMixin
 from PyPoE.poe.constants import MOD_GENERATION_TYPE
+from PyPoE.poe.file.dat import RelationalReader
 from PyPoE.poe.file.shared import AbstractFileReadOnly, ParserError, ParserWarning
 from PyPoE.poe.file.shared.cache import AbstractFileCache
 
@@ -205,7 +206,7 @@ class TranslationReprMixin(ReprMixin):
     }
 
     @property
-    def _parent_repr(self):
+    def _parent_repr(self) -> str:
         return '%s<%s>' % (self.parent.__class__.__name__, hex(id(self.parent)))
 
 
@@ -233,7 +234,7 @@ class Translation(TranslationReprMixin):
         ('ids', None),
     ))
 
-    def __init__(self, identifier: Union[str, None] = None):
+    def __init__(self, identifier: Union[str, None] = None) -> None:
         self.languages: List[TranslationLanguage] = []
         self.ids: List[str] = []
         self.identifier: Union[str, None] = identifier
@@ -253,7 +254,7 @@ class Translation(TranslationReprMixin):
     def __hash__(self):
         return hash((tuple(self.languages), tuple(self.ids)))
 
-    def diff(self, other):
+    def diff(self, other) -> None:
         if not isinstance(other, Translation):
             raise TypeError()
 
@@ -310,13 +311,13 @@ class TranslationLanguage(TranslationReprMixin):
 
     __slots__ = ['parent', 'language', 'strings']
 
-    def __init__(self, language, parent):
+    def __init__(self, language: str, parent: List['TranslationString']):
         parent.languages.append(self)
         self.parent = parent
         self.language = language
         self.strings = []
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, TranslationLanguage):
             return False
 
@@ -331,7 +332,7 @@ class TranslationLanguage(TranslationReprMixin):
     def __hash__(self):
         return hash((self.language, tuple(self.strings)))
 
-    def diff(self, other):
+    def diff(self, other: Any) -> None:
         if not isinstance(other, TranslationLanguage):
             raise TypeError()
 
@@ -511,7 +512,7 @@ class TranslationString(TranslationReprMixin):
     _RANGE_FORMAT = '({0}-{1})'
     _NEGATIVE_RANGE_FORMAT = '-({0}-{1})'
 
-    def __init__(self, parent: TranslationLanguage):
+    def __init__(self, parent: TranslationLanguage) -> None:
         parent.strings.append(self)
         self.parent: TranslationLanguage = parent
         self.quantifier: TranslationQuantifierHandler = \
@@ -595,7 +596,7 @@ class TranslationString(TranslationReprMixin):
         s.append(self.strings[-1])
         return ''.join(s)
 
-    def diff(self, other):
+    def diff(self, other: Any):
         if not isinstance(other, TranslationString):
             raise TypeError()
 
@@ -1030,7 +1031,7 @@ class TranslationQuantifierHandler(TranslationReprMixin):
             return None
         return f
 
-    def register_from_string(self, string: str):
+    def register_from_string(self, string: str) -> None:
         """
         Registers handlers from the quantifier string.
 
@@ -1195,7 +1196,7 @@ class TranslationQuantifier(TranslationReprMixin):
 
 
 class TQReminderString(TranslationQuantifier):
-    def __init__(self, relational_reader, *args, **kwargs):
+    def __init__(self, relational_reader: RelationalReader, *args: Any, **kwargs: Any) -> None:
         self.relational_reader = relational_reader
         super().__init__(
             id='reminderstring',
@@ -1257,20 +1258,20 @@ class TranslationResult(TranslationReprMixin):
     ]
 
     def __init__(self,
-                 found,
-                 found_lines,
-                 lines,
-                 missing,
-                 missing_values,
-                 partial,
-                 values,
-                 unused,
-                 values_parsed,
-                 source_ids,
-                 source_values,
-                 extra_strings,
-                 string_instances,
-                 ):
+                 found: List[Translation],
+                 found_lines: List[str],
+                 lines: List[str],
+                 missing: List[str],
+                 missing_values: List[int],
+                 partial: List[Translation],
+                 values: List[int],
+                 unused: List[int],
+                 values_parsed: List[str],
+                 source_ids: List[str],
+                 source_values: Union[List[int], List[Tuple[int, int]]],
+                 extra_strings: List[Dict[str, str]],
+                 string_instances: List[TranslationString],
+                 ) -> None:
         self.found: List[Translation] = found
         self.found_lines: List[str] = found_lines
         self.lines: List[str] = lines
@@ -1329,7 +1330,7 @@ class TranslationReverseResult(TranslationReprMixin):
 
     def __init__(self,
                  translations: List[Translation],
-                 values: List[Union[int, float]]):
+                 values: List[Union[int, float]]) -> None:
         self.translations: List[Translation] = translations
         self.values: List[Union[int, float]] = values
 
@@ -1359,7 +1360,7 @@ class TranslationFile(AbstractFileReadOnly):
     def __init__(self,
                  file_path: Union[t_Iterable[str], str, None] = None,
                  base_dir: Union[str, None] = None,
-                 parent: Union['TranslationFileCache', None] = None):
+                 parent: Union['TranslationFileCache', None] = None) -> None:
         """
         Creates a new TranslationFile instance from the given translation
         file(s).
@@ -1417,7 +1418,7 @@ class TranslationFile(AbstractFileReadOnly):
             for path in file_path:
                 self.merge(TranslationFile(path))
 
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: io.BytesIO, *args: Any, **kwargs: Any) -> None:
         self.translations = []
         data = buffer.read().decode('utf-16')
 
@@ -1572,7 +1573,7 @@ class TranslationFile(AbstractFileReadOnly):
 
         return True
 
-    def _add_translation_hashed(self, translation_id, translation):
+    def _add_translation_hashed(self, translation_id: str, translation: Translation):
         if translation_id in self.translations_hash:
             for old_translation in self.translations_hash[translation_id]:
                 # Identical, ignore
@@ -1599,7 +1600,7 @@ class TranslationFile(AbstractFileReadOnly):
         else:
             self.translations_hash[translation_id] = [translation, ]
 
-    def copy(self):
+    def copy(self) -> 'TranslationFile':
         """
         Creates a shallow copy of this TranslationFile.
 
@@ -1616,7 +1617,7 @@ class TranslationFile(AbstractFileReadOnly):
 
         return t
 
-    def merge(self, other: 'TranslationFile'):
+    def merge(self, other: 'TranslationFile') -> None:
         """
         Merges the current translation file with another translation file.
 
@@ -1851,10 +1852,10 @@ class TranslationFileCache(AbstractFileCache):
 
     @doc(prepend=AbstractFileCache.__init__)
     def __init__(self,
-                 *args,
+                 *args: Any,
                  merge_with_custom_file: Union[None, bool, TranslationFile] =
                  None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         """
         Parameters
         ----------
@@ -1904,7 +1905,7 @@ class TranslationFileCache(AbstractFileCache):
         return self.get_file(item)
 
     @doc(doc=AbstractFileCache._get_file_instance_args)
-    def _get_file_instance_args(self, file_name, *args, **kwargs):
+    def _get_file_instance_args(self, file_name: str, *args: Any, **kwargs: Any):
         return {
             'parent': self,
         }
@@ -1950,7 +1951,7 @@ class TranslationFileCache(AbstractFileCache):
 # =============================================================================
 
 
-def _diff_list(self, other, diff=True):
+def _diff_list(self: List, other: List, diff=True):
     len_self = len(self)
     len_other = len(other)
     if len_self != len_other:
@@ -1967,7 +1968,7 @@ def _diff_list(self, other, diff=True):
             self[i].diff(other[i])
 
 
-def _diff_dict(self, other):
+def _diff_dict(self: Dict, other: Dict):
     key_self = set(tuple(self.keys()))
     key_other = set(tuple(other.keys()))
 
@@ -2002,7 +2003,7 @@ def get_custom_translation_file() -> TranslationFile:
     return _custom_translation_file
 
 
-def set_custom_translation_file(file: Union[str, None] = None):
+def set_custom_translation_file(file: Union[str, None] = None) -> None:
     """
     Sets the custom translation file.
 
@@ -2024,7 +2025,7 @@ custom_translation_file = property(
 )
 
 
-def install_data_dependant_quantifiers(relational_reader):
+def install_data_dependant_quantifiers(relational_reader: RelationalReader) -> None:
     """
     Install data dependant quantifiers into this class.
 
@@ -2035,7 +2036,7 @@ def install_data_dependant_quantifiers(relational_reader):
         files from.
     """
 
-    def _get_reverse_lookup_from_reader(relational_reader, key):
+    def _get_reverse_lookup_from_reader(relational_reader: RelationalReader, key: str) -> Any:
         def _get_from_value(value):
             for row in relational_reader:
                 if row[key] == value:
@@ -2049,7 +2050,7 @@ def install_data_dependant_quantifiers(relational_reader):
             relational_reader['ItemClasses.dat'], 'Name'),
     )
 
-    def _tempest_mod_text_reverse(value):
+    def _tempest_mod_text_reverse(value: Any) -> Union[None, List]:
         results = []
         for row in relational_reader['Mods.dat']:
             if row['GenerationType'] != MOD_GENERATION_TYPE.TEMPEST:
@@ -2070,7 +2071,7 @@ def install_data_dependant_quantifiers(relational_reader):
         reverse_handler=_tempest_mod_text_reverse,
     )
 
-    def _get_reverse_lookup_from_reader(relational_reader, key):
+    def _get_reverse_lookup_from_reader(relational_reader: RelationalReader, key: str) -> Any:
         def _get_from_value(value):
             for row in relational_reader:
                 if row[key] == value:

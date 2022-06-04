@@ -42,7 +42,9 @@ Public API
 
 # Python
 import codecs
+import io
 import re
+from typing import Any, Dict
 
 # self
 from PyPoE.poe.file.shared import AbstractFile
@@ -78,7 +80,7 @@ class IDLRecord(Record):
     """
     __slots__ = ['destination', 'source', 'x1', 'y1', 'x2', 'y2']
 
-    def __init__(self, destination, source, x1, y1, x2, y2):
+    def __init__(self, destination: str, source: str, x1: int, y1: int, x2: int, y2: int) -> None:
         """
         Creates a new IDLRecord instance.
 
@@ -163,11 +165,11 @@ class IDLFile(AbstractFile, TypedList, metaclass=TypedContainerMeta):
         re.UNICODE | re.MULTILINE
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         AbstractFile.__init__(self)
         TypedList.__init__(self)
 
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: io.BytesIO, *args: Any, **kwargs: Any) -> None:
         # Reset
         TypedList.__init__(self)
 
@@ -176,7 +178,7 @@ class IDLFile(AbstractFile, TypedList, metaclass=TypedContainerMeta):
         for match in self._regex_parse.finditer(data):
             self.append(IDLRecord(**match.groupdict()))
 
-    def _write(self, buffer, *args, **kwargs):
+    def _write(self, buffer: io.BytesIO, *args: Any, **kwargs: Any) -> None:
         lines = []
         for record in self:
             lines.append(str(record))
@@ -184,7 +186,7 @@ class IDLFile(AbstractFile, TypedList, metaclass=TypedContainerMeta):
 
         buffer.write(codecs.BOM_UTF16_LE + ''.join(lines).encode('utf-16_le'))
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         """
         Returns
         -------

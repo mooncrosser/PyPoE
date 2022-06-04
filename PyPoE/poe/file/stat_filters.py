@@ -40,7 +40,9 @@ Public API
 # =============================================================================
 
 # Python
+import io
 import re
+from typing import Any, List
 
 # 3rd-party
 
@@ -75,7 +77,7 @@ class SkillEntry(ReprMixin):
 
     __slots__ = ['skill_id', 'translation_file_path', 'stats']
 
-    def __init__(self, skill_id, translation_file_path, stats):
+    def __init__(self, skill_id: str, translation_file_path: str, stats: List[str]) -> None:
         self.skill_id = skill_id
         self.translation_file_path = translation_file_path
         self.stats = stats
@@ -115,7 +117,7 @@ class StatFilterFile(AbstractFileReadOnly):
     groups = None
     skills = None
 
-    def _read(self, buffer, *args, **kwargs):
+    def _read(self, buffer: io.BytesIO, *args: Any, **kwargs: Any) -> None:
         data = buffer.read().decode('utf-16')
 
         self.groups = {}
