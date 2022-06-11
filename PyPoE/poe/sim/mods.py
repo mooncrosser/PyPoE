@@ -48,11 +48,12 @@ Documentation
 # =============================================================================
 
 # Python
+from typing import Any, List, Union
 
 # 3rd-party
 
 # self
-from PyPoE.poe.file.dat import DatRecord
+from PyPoE.poe.file.dat import DatRecord, DatFile
 from PyPoE.poe.file.translations import TranslationFileCache
 from PyPoE.poe.constants import MOD_DOMAIN, MOD_GENERATION_TYPE, MOD_STATS_RANGE
 
@@ -90,7 +91,7 @@ class SpawnChanceCalculator:
     """
     Class to calculate spawn chances.
     """
-    def __init__(self, mod_list, tags):
+    def __init__(self, mod_list: List[DatRecord], tags: List[str]):
         """
         Parameters
         ----------
@@ -103,7 +104,7 @@ class SpawnChanceCalculator:
         self.tags = tags
         self.total_spawn_weight = self.get_total_spawn_weight()
 
-    def get_total_spawn_weight(self):
+    def get_total_spawn_weight(self) -> int:
         """
         Calculate the total spawn weight based on the stored modifier list
 
@@ -118,7 +119,7 @@ class SpawnChanceCalculator:
 
         return total_spawn_weight
 
-    def get_mod(self, mod_id):
+    def get_mod(self, mod_id: str) -> DatRecord:
         """
         Returns the mod for the specified mod id based on the stored modifier
         list or None if it isn't found.
@@ -139,7 +140,7 @@ class SpawnChanceCalculator:
         """
         return get_mod_from_id(mod_id, self.mod_list)
 
-    def get_spawn_weight(self, mod):
+    def get_spawn_weight(self, mod: DatRecord) -> int:
         """
         Calculates the spawn weight of the given mod based on the stored list
         of tags.
@@ -164,7 +165,7 @@ class SpawnChanceCalculator:
         """
         return get_spawn_weight(mod, self.tags)
 
-    def spawn_chance(self, mod_or_id, remove=True):
+    def spawn_chance(self, mod_or_id: Union[str, DatRecord], remove: bool = True) -> float:
         """
         Calculates the spawn chance for the given mod based on the tags and the
         mod list given to this instance.
@@ -231,7 +232,7 @@ class SpawnChanceCalculator:
 # Functions
 # =============================================================================
 
-def get_translation_file_from_domain(domain):
+def get_translation_file_from_domain(domain: MOD_DOMAIN) -> str:
     """
     Returns the likely stat translation file for a given mod domain.
 
@@ -251,7 +252,12 @@ def get_translation_file_from_domain(domain):
         return 'stat_descriptions.txt'
 
 
-def get_translation(mod, translation_cache, translation_file=None, **kwargs):
+def get_translation(
+        mod: DatRecord,
+        translation_cache: TranslationFileCache,
+        translation_file: str = None,
+        **kwargs: Any
+):
     """
     Returns the Translation result of the stats found on the specified mod
     using the specified TranslationFileCache.
@@ -296,7 +302,7 @@ def get_translation(mod, translation_cache, translation_file=None, **kwargs):
     )
 
 
-def get_mod_from_id(mod_id, mod_list):
+def get_mod_from_id(mod_id: str, mod_list: List[DatRecord]) -> Union[DatRecord, None]:
     """
     Returns the mod for given mod or None if it isn't found.
 
@@ -319,7 +325,7 @@ def get_mod_from_id(mod_id, mod_list):
     return None
 
 
-def get_spawn_weight(mod, tags):
+def get_spawn_weight(mod: DatRecord, tags: List[str]) -> int:
     """
     Calculates the spawn weight of the given mod for the given tags.
 
@@ -347,12 +353,12 @@ def get_spawn_weight(mod, tags):
 
 
 def generate_spawnable_mod_list(
-        mod_dat_file,
-        domain,
-        generation_type,
-        level=1,
-        tags=['default', ]
-        ):
+        mod_dat_file: DatFile,
+        domain: MOD_DOMAIN,
+        generation_type: MOD_GENERATION_TYPE,
+        level: int = 1,
+        tags: List[str] = ['default', ]
+        ) -> List[DatRecord]:
     """
     Generates a list of modifiers that can be spawned for the specified
     parameters, i.e. mods that can not spawn will be removed.

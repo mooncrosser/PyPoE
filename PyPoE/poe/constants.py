@@ -226,7 +226,7 @@ MOD_SELL_PRICES = {
 
 
 class IntEnumMetaOverride(EnumMeta):
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> 'IntEnumMetaOverride':
         if isinstance(item, int):
             return self(item)
         else:
@@ -543,7 +543,7 @@ class SOCKET_COLOUR(Enum):
     BLUE = B
     WHITE = W
 
-    def __new__(cls, char, id):
+    def __new__(cls, char: str, id: int):
         obj = object.__new__(cls)
         obj._value_ = char
         obj.char = char
@@ -591,7 +591,7 @@ class RARITY(Enum, metaclass=IntEnumMetaOverride):
     UNIQUE = (4, 'Unique', 'unique', 'brown')
     ANY = (5, 'Any', 'any', 'any')
 
-    def __new__(cls, id, upper, lower, colour):
+    def __new__(cls, id: int, upper: str, lower: str, colour: str):
         obj = object.__new__(cls)
         obj._value_ = id
         obj.id = id

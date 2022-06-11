@@ -78,7 +78,7 @@ class GemTypes(Enum):
 # =============================================================================
 
 
-def armour_damage_reduction(armour, damage):
+def armour_damage_reduction(armour: int, damage: int) -> int:
     """
     Calculates the damage reduction from armour.
 
@@ -102,7 +102,7 @@ def armour_damage_reduction(armour, damage):
     return armour / (armour + 10 * damage)
 
 
-def chance_to_hit(accuracy, evasion):
+def chance_to_hit(accuracy: int, evasion: int) -> float:
     """
     Calculates the chance to hit for the given accuracy and evasion.
 
@@ -121,7 +121,7 @@ def chance_to_hit(accuracy, evasion):
     return accuracy / (accuracy + (evasion * 0.25) ** 0.8)
 
 
-def chance_to_evade(accuracy, evasion):
+def chance_to_evade(accuracy: int, evasion: int) -> float:
     """
     Calculates the chance to evade for the given accuracy and evasion.
 
@@ -140,7 +140,7 @@ def chance_to_evade(accuracy, evasion):
     return 1 - chance_to_hit(accuracy, evasion)
 
 
-def gem_stat_requirement(level, gtype=GemTypes.support, multi=100):
+def gem_stat_requirement(level: int, gtype: GemTypes = GemTypes.support, multi: int = 100) -> int:
     """
     Calculates and returns the stat requirement for the specified level
     requirement.

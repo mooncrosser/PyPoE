@@ -35,6 +35,7 @@ Documentation
 # Python
 import sys
 import os
+from typing import Union
 
 try:
     import winreg
@@ -63,10 +64,10 @@ class PoEPathList(list):
     used just like a regular list.
     It addition it performs existence checks on the items added by default.
     """
-    def __init__(self, only_existing=True):
+    def __init__(self, only_existing: bool = True) -> None:
         self._only_existing = True
 
-    def append(self, path, version, distributor):
+    def append(self, path: str, version: VERSION, distributor: DISTRIBUTOR):
         if path is None:
             return
 
@@ -80,7 +81,7 @@ class PoEPathList(list):
 
 
 class PoEPathValue(str):
-    def __new__(self, path, version, distributor):
+    def __new__(self, path: str, version: VERSION, distributor: DISTRIBUTOR):
         """
 
         Parameters
@@ -108,7 +109,7 @@ class PoEPath:
         official Path of Exile client on Linux.
     """
 
-    def __init__(self, version=VERSION.DEFAULT, distributor=DISTRIBUTOR.DEFAULT):
+    def __init__(self, version: VERSION = VERSION.DEFAULT, distributor: DISTRIBUTOR = DISTRIBUTOR.DEFAULT) -> None:
         """
         Change the version or distributor if you only watch to search for
         specific installations.
@@ -123,7 +124,7 @@ class PoEPath:
         self.version = version
         self.distributor = distributor
 
-    def _get_winreg_path(self, regpath, regkey, user=True):
+    def _get_winreg_path(self, regpath: str, regkey: str, user: bool = True) -> Union[str, None]:
         if user:
             key = winreg.HKEY_CURRENT_USER
         else:
@@ -138,7 +139,7 @@ class PoEPath:
             return None
         return path
 
-    def get_installation_paths(self, only_existing=True):
+    def get_installation_paths(self, only_existing: bool = True) -> PoEPathList:
         """
         Returns a PoEPathList instance containing PoEPathValues depending on
         the version and distributor values set on class construction.

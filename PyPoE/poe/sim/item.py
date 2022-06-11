@@ -45,6 +45,7 @@ Documentation
 # Python
 import re
 from enum import Enum
+from typing import Any, Dict, List, Pattern
 
 # 3rd-party
 
@@ -63,19 +64,19 @@ __all__ = ['ItemParser']
 # =============================================================================
 
 
-def _regex_build_single_re(k, v):
+def _regex_build_single_re(k: str, v: Dict) -> str:
     if 're' in v:
         return r'%s: (?P<%s>.*)$' % (v['re'], k)
     elif 're2' in v:
         return v['re2']
 
 
-def _regex_update_singular_dict(singular_dict):
+def _regex_update_singular_dict(singular_dict: Dict):
     for k, v in singular_dict.items():
         v['re_compiled'] = re.compile(_regex_build_single_re(k, v), re.UNICODE)
 
 
-def _regex_build_from_handler_dict(handler_dict):
+def _regex_build_from_handler_dict(handler_dict: Dict) -> Pattern:
     conditionals = []
     for k, v in handler_dict.items():
         conditionals.append(_regex_build_single_re(k, v))
@@ -106,14 +107,14 @@ class ItemSocket:
 
     __slots__ = ('index', 'colour')
 
-    def __init__(self, index, colour):
+    def __init__(self, index:  int, colour: SOCKET_COLOUR) -> None:
         self.index = index
         self.colour = colour
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'ItemSocket(%s, %s)' % (self.index, repr(self.colour))
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if not isinstance(other, ItemSocket):
             return False
 
@@ -511,7 +512,7 @@ class ItemParser:
         re.UNICODE,
     )
 
-    def __init__(self, item_info_string):
+    def __init__(self, item_info_string: str) -> None:
         """
         Creates a new ItemParser instance and attempts to parse the given
         item string from the CTRL-C command in game.
@@ -529,13 +530,13 @@ class ItemParser:
 
         current_sec = -len(sections)
 
-        def increment_sec(value=True):
+        def increment_sec(value: bool = True):
             # Python 3 is neat
             nonlocal current_sec
             if value:
                 current_sec += 1
 
-        def section(index=None, offset=0):
+        def section(index: int = None, offset: int = 0) -> str:
             return sections[index or (current_sec+offset)].strip('\r\n')
 
         # Header section
@@ -731,10 +732,10 @@ class ItemParser:
             self.prefix = match.group('prefix')
             self.base_item_name = self.base_item_name.replace(self.prefix + ' ', '')
 
-    def _split(self, section):
+    def _split(self, section: str) -> List[str]:
         return self._re_split_newline.split(section)
 
-    def _handle_singular(self, string, key):
+    def _handle_singular(self, string: str, key: str) -> bool:
         match = self._re_singular[key]['re_compiled'].match(string)
         if match:
             setattr(self, key, self._re_singular[key]['func'](match.group(key)))
@@ -743,7 +744,7 @@ class ItemParser:
         setattr(self, key, None)
         return False
 
-    def _handle_handlers(self, string, regex, handlers):
+    def _handle_handlers(self, string: str, regex: Pattern, handlers: Dict) -> bool:
         for k in handlers:
             setattr(self, k, None)
 

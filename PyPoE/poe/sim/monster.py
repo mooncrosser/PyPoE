@@ -39,7 +39,9 @@ Internal API
 # =============================================================================
 
 # Python
+import typing
 from collections.abc import Iterable
+from typing import Any, List, Union
 
 # 3rd-party
 
@@ -60,7 +62,7 @@ __all__ = []
 
 
 class Monster:
-    def __init__(self, parent, mv):
+    def __init__(self, parent: 'MonsterFactory', mv: Any):
         self.parent = parent
         self._mv = mv
         self._mt = self.mv['MonsterTypesKey']
@@ -73,19 +75,19 @@ class Monster:
         self._level = None
 
     @property
-    def level(self):
+    def level(self) -> int:
         if self._level is None:
             raise ValueError('Set monster level first before performing actions'
                              ' that require monster level')
         return self._level
 
     @level.setter
-    def level(self, value):
+    def level(self, value) -> None:
         if value < 1 or value > 100:
             raise ValueError('Monster level must be 1-100')
         self._level = value
 
-    def damage(self, map_tier=None):
+    def damage(self, map_tier: int = None):
         base = self.parent.rr['DefaultMonsterStats.dat'][self.level]
 
 
@@ -103,7 +105,13 @@ class MonsterFactory:
 
     rarity_mods = None
 
-    def __init__(self, *args, relational_reader, otfile_cache, **kwargs):
+    def __init__(
+            self,
+            *args: Any,
+            relational_reader: RelationalReader,
+            otfile_cache: OTFileCache,
+            **kwargs: Any
+    ) -> None:
         """
 
         Parameters
@@ -138,7 +146,14 @@ class MonsterFactory:
             elif mod['Id'].startswith('MonsterUnique'):
                 self.rarity_mods[RARITY.UNIQUE] = mod
 
-    def monster(self, rowid=None, metaid=None, name=None, *args, **kwargs):
+    def monster(
+            self,
+            rowid: int = None,
+            metaid: Union[str, typing.Iterable] = None,
+            name: Union[str, typing.Iterable] = None,
+            *args: Any,
+            **kwargs: Any
+    ) -> List[Monster]:
         """
         Creates a list of Monster instances and returns them based on the
         passed search parameters.

@@ -62,12 +62,13 @@ from urllib.error import URLError
 from collections import OrderedDict
 from hashlib import sha256
 from hmac import compare_digest
+from typing import Any, Dict, List
 
 # 3rd-party
 
 # self
 from PyPoE.shared.mixins import ReprMixin
-from PyPoE.poe.file.ggpk import DirectoryNode, DirectoryRecord, FileRecord
+from PyPoE.poe.file.ggpk import DirectoryNode, DirectoryRecord, FileRecord, GGPKFile
 from PyPoE.shared.murmur2 import murmur2_32
 
 # =============================================================================
@@ -80,7 +81,7 @@ __all__ = []
 # Functions
 # =============================================================================
 
-def socket_fd_open(socket_fd):
+def socket_fd_open(socket_fd: int):
     """
     Create a TCP/IP socket object from a
     :meth:`socket.socket.detach` file descriptor.
@@ -103,7 +104,7 @@ def socket_fd_open(socket_fd):
                          proto=socket.IPPROTO_TCP)
     return sock
 
-def socket_fd_close(socket_fd):
+def socket_fd_close(socket_fd: int):
     """
     Shutdown (FIN) and close a TCP/IP socket object from a
     :meth:`socket.socket.detach` file descriptor.
@@ -120,8 +121,8 @@ def socket_fd_close(socket_fd):
     # close the socket
     sock.close()
 
-def node_check_hash(directory_node, folder_path=None, ggpk=None,
-                    recurse=True, bufsize=2**20):
+def node_check_hash(directory_node: DirectoryNode, folder_path: str = None, ggpk: GGPKFile = None,
+                    recurse: bool = True, bufsize: int = 2**20):
     """
     Compare expected hash against files on disk.
 
@@ -315,7 +316,7 @@ def node_check_hash(directory_node, folder_path=None, ggpk=None,
         return hash_list
 
 def node_outdated_files(patch_file_list, directory_node_path,
-                        folder_path, recurse=False, bufsize=2**10):
+                        folder_path, recurse=False, bufsize=2**10) -> Dict:
     """
     Get expected hash based list of outdated files on disk
     for given directory node.
@@ -415,8 +416,8 @@ def node_outdated_files(patch_file_list, directory_node_path,
 
     return download_list
 
-def node_update_files(patch_file_list, directory_node_path,
-                      folder_path, recurse=False, bufsize=2**10):
+def node_update_files(patch_file_list: 'PatchFileList', directory_node_path: str,
+                      folder_path: str, recurse: bool = False, bufsize: int = 2**10):
     """
     Update files and folders on disk for given node path.
 
@@ -540,7 +541,7 @@ class Patch:
     # use patch proto 4
     _PROTO = b'\x01\x04'
 
-    def __init__(self, master_server=_SERVER_IPV4, master_port=_PORT):
+    def __init__(self, master_server: str = _SERVER_IPV4, master_port: int = _PORT) -> None:
         """
         Automatically fetches patching urls on class creation.
 
@@ -559,7 +560,7 @@ class Patch:
         self._master_server = (master_server, master_port)
         self.update_patch_urls()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """
         Automatically close the patchserver connection and socket.
         """
@@ -574,7 +575,7 @@ class Patch:
         except OSError:
             raise
 
-    def update_patch_urls(self):
+    def update_patch_urls(self) -> None:
         """
         Updates the patch urls from the master server.
 
@@ -607,7 +608,7 @@ class Patch:
             # Close this later!
             self.sock_fd = sock.detach()
 
-    def download(self, file_path, dst_dir=None, dst_file=None):
+    def download(self, file_path: str, dst_dir: str = None, dst_file: str = None):
         """
         Downloads the file at the specified path from the patching server.
 
@@ -655,7 +656,7 @@ class Patch:
         with open(write_path, mode='wb') as f:
             f.write(self.download_raw(file_path))
 
-    def download_raw(self, file_path):
+    def download_raw(self, file_path: str) -> bytes:
         """
         Downloads the raw bytes.
 
@@ -690,7 +691,7 @@ class Patch:
                     raise url_error
 
     @property
-    def version(self):
+    def version(self) -> str:
         """
         Retrieves the game version from the url.
 
@@ -816,7 +817,7 @@ class PatchFileList:
     _PROTO_PRE = b'\x03\x00'
     _PROTO_HEADER2 = b'\x04\x00'
 
-    def __init__(self, patch, socket_timeout=1.0):
+    def __init__(self, patch: Patch, socket_timeout: float = 1.0) -> None:
         """
         Automatically fetch root file list on class creation.
 
@@ -840,13 +841,13 @@ class PatchFileList:
         # Get the root filelist
         self.update_filelist([''])
 
-    def __del__(self):
+    def __del__(self) -> None:
         """
         Detach socket on instance deletion
         """
         self.patch.sock_fd = self.sock.detach()
 
-    def read(self, read_length):
+    def read(self, read_length: int) -> bytes:
         """
         Read length of data from :attr:`.data`.
         Get and save more data from :attr:`.sock` if length not met.
@@ -907,7 +908,7 @@ class PatchFileList:
                 break
         return data_read
 
-    def extract_varchar(self):
+    def extract_varchar(self) -> str:
         """
         Helper function to extract variable length string from :attr:`.data`.
         String length is first byte of data.
@@ -928,7 +929,7 @@ class PatchFileList:
                 varchar_length_blob).decode('utf-16')
         return varchar_name
 
-    def update_filelist(self, folders):
+    def update_filelist(self, folders: List):
         """
         Get file details for a folder from the patch server.
 
@@ -1076,18 +1077,18 @@ class BaseRecordData(ReprMixin):
     hash :  int
         SHA256 hash of file contents
     """
-    def __init__(self, name, hash):
+    def __init__(self, name: str, hash: int) -> None:
         self._name = name
         self.hash = hash
 
 class VirtualDirectoryRecord(BaseRecordData,
                              DirectoryRecord):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 class VirtualFileRecord(BaseRecordData,
                         FileRecord):
-    def __init__(self, name, hash, size):
+    def __init__(self, name: str, hash: int, size: int) -> None:
         self.data_length = size
         super().__init__(name, hash)
 
@@ -1100,10 +1101,10 @@ class DirectoryNodeExtended(DirectoryNode):
 
         :meth:`.gen_walk`
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
-    def get_dict(self, recurse=True):
+    def get_dict(self, recurse: bool = True) -> Dict:
         """
         Get a dict of :class:`PyPoE.poe.file.ggpk.DirectoryNode`
         record item details
@@ -1163,7 +1164,7 @@ class DirectoryNodeExtended(DirectoryNode):
 
         return record_dict
 
-    def load_dict(self, node_dict, parent=None):
+    def load_dict(self, node_dict: Dict, parent: DirectoryNode = None) -> None:
         """
         Fill a :class:`DirectoryNode` from a dict
 
@@ -1235,7 +1236,7 @@ class DirectoryNodeExtended(DirectoryNode):
         except KeyError:
             pass
 
-    def gen_walk(self, max_depth=-1, _depth=0):
+    def gen_walk(self, max_depth: int = -1, _depth: int = 0):
         """
         A depth first recursive generator for a DirectoryNode
 

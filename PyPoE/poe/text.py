@@ -106,7 +106,7 @@ class Tag(ReprMixin):
         if children is None:
             self.children: List[Union[str, 'Tag']] = []
 
-    def append_to_children(self, text: str):
+    def append_to_children(self, text: str) -> None:
         """
         Appends a given text to the children attribute
 
